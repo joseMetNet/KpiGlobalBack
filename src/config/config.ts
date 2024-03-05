@@ -3,8 +3,8 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 interface Config {
   readonly APP_PORT: number;
-  readonly authTokenSecret: string;
-  readonly authTokenExpiryDuration: string;
+  readonly AUTH_TOKEN_SECRET: string;
+  readonly AUTH_TOKEN_EXPIRY_DURATION: string;
   readonly DATABASE_USER: string;
   readonly DATABASE_PASSWORD: string;
   readonly DATABASE_PORT: number;
@@ -24,9 +24,9 @@ function getEnvVariable(name: string): string {
 }
 
 export const config: Config = Object.freeze({
-	APP_PORT: parseInt(getEnvVariable('PORT_APP'), 10),
-	authTokenSecret: getEnvVariable('AUTH_TOKEN_SECRET'),
-	authTokenExpiryDuration: getEnvVariable('AUTH_TOKEN_EXPIRY_DURATION'),
+	APP_PORT: parseInt(getEnvVariable('APP_PORT'), 10),
+	AUTH_TOKEN_SECRET: getEnvVariable('AUTH_TOKEN_SECRET'),
+	AUTH_TOKEN_EXPIRY_DURATION: getEnvVariable('AUTH_TOKEN_EXPIRY_DURATION'),
 	DATABASE_USER: getEnvVariable('DATABASE_USER'),
 	DATABASE_PASSWORD: getEnvVariable('DATABASE_PASSWORD'),
 	DATABASE_PORT: parseInt(getEnvVariable('DATABASE_PORT'), 10),

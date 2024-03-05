@@ -2,6 +2,7 @@ import { Application, Router } from 'express';
 import { check } from 'express-validator';
 import { validateEnpoint } from '../middlewares/validatorEnpoint';
 import { authController } from '../controllers';
+import { authentication } from '../middlewares/validate-token';
 
 export function authRoutes(app: Application): void {
 	const routes: Router = Router();
@@ -98,6 +99,43 @@ export function authRoutes(app: Application): void {
 		authController.login
 	);
 
+	app.use('/api/v1/auth/', routes);
+
+	/**
+	  * @openapi
+	  * '/v1/auth/send-verification-email':
+	  *  post:
+	  *     security: []
+	  *     tags:
+	  *     - Auth Controller
+	  *     summary: Send code to verify one user
+	  *     requestBody:
+	  *      required: true
+	  *      content:
+	  *        application/json:
+	  *           schema:
+	  *            type: object
+	  *            required:
+	  *              - email
+	  *            properties:
+	  *              email:
+	  *                type: string
+	  *                default: email@mail.com
+	  *     responses:
+	  *      200:
+	  *        description: Code successfully send
+	  *      404:
+	  *        description: User Not Found
+	  *      500:
+	  *        description: Server Error
+	  */
+	routes.post(
+		'/send-verification-email',
+		[check('email', 'email is required').notEmpty(), validateEnpoint],
+		authController.sendVerificationEmail
+	);
+	app.use('/api/v1/auth/', routes);
+
 	/**
     * @openapi
     * '/v1/auth/verify-user':
@@ -105,7 +143,7 @@ export function authRoutes(app: Application): void {
     *     security: []
     *     tags:
     *     - Auth Controller
-    *     summary: Verify user email
+    *     summary: Verify user identity
     *     requestBody:
     *      required: true
     *      content:
@@ -124,19 +162,53 @@ export function authRoutes(app: Application): void {
     *                default: code
     *     responses:
     *      200:
-    *        description: Email verified
-    *      409:
-    *        description: Invalid credentials
-    *      404:
-    *        description: User Not Found
+    *        description: Password successfully restored
     *      500:
     *        description: Server Error
     */
 	routes.patch(
 		'/verify-user',
-		[check('email', 'email is required').notEmpty(), validateEnpoint],
-		[check('code', 'code property must have 5 characters').isLength({min: 5, max: 5}), validateEnpoint],
+		[check('code', 'email is required').notEmpty(), validateEnpoint],
+		[check('code', 'verification code is required').notEmpty(), validateEnpoint],
 		authController.verifyUser
+	);
+
+	/**
+	  * @openapi
+	  * '/v1/auth/reset-password':
+	  *  post:
+	  *     tags:
+	  *     - Auth Controller
+	  *     summary: Reset password
+	  *     requestBody:
+	  *      required: true
+	  *      content:
+	  *        application/json:
+	  *           schema:
+	  *            type: object
+	  *            required:
+	  *              - email
+	  *              - password
+	  *            properties:
+	  *              email:
+	  *                type: string
+	  *                default: mail@mail.com
+	  *              password:
+	  *                type: string
+	  *                default: password
+	  *     responses:
+	  *      200:
+	  *        description: Password successfully restored
+	  *      500:
+	  *        description: Server Error
+	  */
+
+	routes.post(
+		'/reset-password',
+		[check('email', 'email is required').notEmpty(), validateEnpoint],
+		[check('password', 'password is required').notEmpty(), validateEnpoint],
+		authentication,
+		authController.resetPassword
 	);
 	app.use('/api/v1/auth/', routes);
 }

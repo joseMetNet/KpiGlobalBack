@@ -1,18 +1,18 @@
-export interface dataExample  {
-    _id: string
-}
-
 export interface AuthTokenPayload {
-	id: number
+	id: number;
 }
 
 export interface RegisterRequest {
-  firstName: string,
-  lastName: string,
+  firstName: string;
+  lastName: string;
   email: string;
   password: string;
 }
 
+export interface ChangePasswordRequest {
+  email: string;
+  password: string;
+}
 
 export interface AuthRequest {
   email: string;
@@ -25,14 +25,14 @@ export interface VerifyUserRequest {
 }
 
 export interface ImessageComposed {
-    translationKey: string,
-    translationParams: object
+    translationKey: string;
+    translationParams: object;
 }
 
 export interface ResponseEntity {
-    code: number,
-    status: StatusValue | ImessageComposed,
-    data?: object
+    code: number;
+    status: StatusValue | ImessageComposed;
+    data?: object;
 }
 
 export enum StatusValue {
