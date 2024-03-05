@@ -4,11 +4,11 @@ import { config } from '../../config';
 import { AuthTokenPayload } from '../../interface/example';
 
 export function createAuthToken(payload: AuthTokenPayload): string {
-	return jwt.sign(payload, config.authTokenSecret, {
+	return jwt.sign(payload, config.AUTH_TOKEN_SECRET, {
 		algorithm: 'HS256',
 		issuer: 'metnet',
 		audience: 'audience',
-		expiresIn: config.authTokenExpiryDuration
+		expiresIn: config.AUTH_TOKEN_EXPIRY_DURATION
 	}
 	);
 }
@@ -34,7 +34,6 @@ export async function sendVerificationEmail(code: string, email: string): Promis
                }`
 		};
 		const request = await fetch(host, options);
-		console.log(request);
 		if (!request.ok) {
 			return CustomError.badRequest(`Error sending the verification email ${request.json}`);
 		}
