@@ -15,7 +15,7 @@ class Server {
 
 	constructor() {
 		this.app = express();
-		this.port = config.APP_PORT;
+		this.port = config.APP_PORT || 8080;
 		this.initializeSwagger();
 		this.middlewares();
 		this.routes();
