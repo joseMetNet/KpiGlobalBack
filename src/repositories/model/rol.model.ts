@@ -1,5 +1,5 @@
 import { DataTypes, Model } from 'sequelize';
-import { sequelize } from '../../DB/config';
+import { sequelize } from '../../config';
 
 export class Rol extends Model {
 	declare id: number;

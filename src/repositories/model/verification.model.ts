@@ -1,5 +1,5 @@
 import { DataTypes, Model } from 'sequelize';
-import { sequelize } from '../../DB/config';
+import { sequelize } from '../../config';
 import { User } from '../user/user.model';
 
 export class VerificationStatus extends Model {
