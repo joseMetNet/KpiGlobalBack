@@ -1,11 +1,11 @@
-import { config, swaggerOptions } from './src/config';
+import { config, swaggerOptions } from './config';
 import express, { Application } from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import 'colors';
 import fileUpload from 'express-fileupload';
-import { authRoutes } from './src/routes';
-import i18n from './src/config/i18n';
+import { authRoutes } from './routes';
+import i18n from './config/i18n';
 import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 
@@ -36,7 +36,7 @@ class Server {
 		this.app.use(i18n.init);
 		this.app.disable('x-powered-by');
 	}
-  
+
 	private initializeSwagger(): void {
 		const configSwagger = swaggerJSDoc(swaggerOptions);
 		this.app.use('/api/v1/docs', swaggerUi.serve, swaggerUi.setup(configSwagger));

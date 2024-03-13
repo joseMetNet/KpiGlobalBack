@@ -1,10 +1,10 @@
-import { StatusCode } from '../interface/example';
+import { StatusCode } from '../interface/auth.interface';
 
-export class CustomError extends Error{
+export class CustomError extends Error {
 	constructor(
-        public readonly statusCode: number,
-        public readonly message: string
-	){
+		public readonly statusCode: number,
+		public readonly message: string
+	) {
 		super(message);
 	}
 	static badRequest(message: string): CustomError {

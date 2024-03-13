@@ -1,10 +1,10 @@
-import { ResponseEntity, StatusValue } from '../interface/example';
+import { ResponseEntity, StatusValue } from '../interface/auth.interface';
 
-export class BuildResponse{
+export class BuildResponse {
 	constructor(
-        public readonly status: StatusValue,
-        public readonly data: object
-	){
+		public readonly status: StatusValue,
+		public readonly data: object
+	) {
 		this.status = status;
 		this.data = data;
 	}
