@@ -4,7 +4,7 @@ import cors from 'cors';
 import morgan from 'morgan';
 import 'colors';
 import fileUpload from 'express-fileupload';
-import { authRoutes } from './routes';
+import { authRoutes, userRoutes } from './routes';
 import i18n from './config/i18n';
 import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
@@ -44,6 +44,7 @@ class Server {
 
 	private routes(): void {
 		authRoutes(this.app);
+		userRoutes(this.app);
 	}
 
 	public listen(): void {
