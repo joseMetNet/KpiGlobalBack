@@ -1,13 +1,13 @@
 import { Application, Router } from 'express';
 import { check } from 'express-validator';
-import { validateEnpoint } from '../middleware/validatorEnpoint';
+import { validateEndpoint } from '../middleware/endpointValidator';
 import { authController } from '../controllers';
 import { authentication } from '../middleware/validate-token';
 
 export function authRoutes(app: Application): void {
-	const routes: Router = Router();
+  const routes: Router = Router();
 
-	/**
+  /**
     * @openapi
     * '/v1/auth/register':
     *  post:
@@ -49,16 +49,16 @@ export function authRoutes(app: Application): void {
     *      500:
     *        description: Server Error
     */
-	routes.post(
-		'/register',
-		[check('firstName', 'firstName is required').notEmpty(), validateEnpoint],
-		[check('lastName', 'lastName is required').notEmpty(), validateEnpoint],
-		[check('email', 'email is required').notEmpty(), validateEnpoint],
-		[check('password', 'password is required').notEmpty(), validateEnpoint],
-		authController.register
-	);
+  routes.post(
+    '/register',
+    [check('firstName', 'firstName is required').notEmpty(), validateEndpoint],
+    [check('lastName', 'lastName is required').notEmpty(), validateEndpoint],
+    [check('email', 'email is required').notEmpty(), validateEndpoint],
+    [check('password', 'password is required').notEmpty(), validateEndpoint],
+    authController.register
+  );
 
-	/**
+  /**
     * @openapi
     * '/v1/auth/login':
     *  post:
@@ -92,16 +92,16 @@ export function authRoutes(app: Application): void {
     *      500:
     *        description: Server Error
     */
-	routes.post(
-		'/login',
-		[check('email', 'email is required').notEmpty(), validateEnpoint],
-		[check('password', 'password is required').notEmpty(), validateEnpoint],
-		authController.login
-	);
+  routes.post(
+    '/login',
+    [check('email', 'email is required').notEmpty(), validateEndpoint],
+    [check('password', 'password is required').notEmpty(), validateEndpoint],
+    authController.login
+  );
 
-	app.use('/api/v1/auth/', routes);
+  app.use('/api/v1/auth/', routes);
 
-	/**
+  /**
 	  * @openapi
 	  * '/v1/auth/send-verification-email':
 	  *  post:
@@ -129,14 +129,14 @@ export function authRoutes(app: Application): void {
 	  *      500:
 	  *        description: Server Error
 	  */
-	routes.post(
-		'/send-verification-email',
-		[check('email', 'email is required').notEmpty(), validateEnpoint],
-		authController.sendVerificationEmail
-	);
-	app.use('/api/v1/auth/', routes);
+  routes.post(
+    '/send-verification-email',
+    [check('email', 'email is required').notEmpty(), validateEndpoint],
+    authController.sendVerificationEmail
+  );
+  app.use('/api/v1/auth/', routes);
 
-	/**
+  /**
     * @openapi
     * '/v1/auth/verify-user':
     *  patch:
@@ -166,14 +166,14 @@ export function authRoutes(app: Application): void {
     *      500:
     *        description: Server Error
     */
-	routes.patch(
-		'/verify-user',
-		[check('code', 'email is required').notEmpty(), validateEnpoint],
-		[check('code', 'verification code is required').notEmpty(), validateEnpoint],
-		authController.verifyUser
-	);
+  routes.patch(
+    '/verify-user',
+    [check('code', 'email is required').notEmpty(), validateEndpoint],
+    [check('code', 'verification code is required').notEmpty(), validateEndpoint],
+    authController.verifyUser
+  );
 
-	/**
+  /**
 	  * @openapi
 	  * '/v1/auth/reset-password':
 	  *  post:
@@ -203,12 +203,12 @@ export function authRoutes(app: Application): void {
 	  *        description: Server Error
 	  */
 
-	routes.post(
-		'/reset-password',
-		[check('email', 'email is required').notEmpty(), validateEnpoint],
-		[check('password', 'password is required').notEmpty(), validateEnpoint],
-		authentication,
-		authController.resetPassword
-	);
-	app.use('/api/v1/auth/', routes);
+  routes.post(
+    '/reset-password',
+    [check('email', 'email is required').notEmpty(), validateEndpoint],
+    [check('password', 'password is required').notEmpty(), validateEndpoint],
+    authentication,
+    authController.resetPassword
+  );
+  app.use('/api/v1/auth/', routes);
 }

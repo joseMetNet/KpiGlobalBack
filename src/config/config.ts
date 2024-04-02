@@ -16,22 +16,22 @@ interface Config {
 
 
 function getEnvVariable(name: string): string {
-	const env = process.env[name];
-	if (!env) {
-		throw new Error(`Environment variable ${name} not found`);
-	}
-	return env;
+  const env = process.env[name];
+  if (!env) {
+    throw new Error(`Environment variable ${name} not found`);
+  }
+  return env;
 }
 
 export const config: Config = Object.freeze({
-	APP_PORT: parseInt(getEnvVariable('APP_PORT'), 10),
-	AUTH_TOKEN_SECRET: getEnvVariable('AUTH_TOKEN_SECRET'),
-	AUTH_TOKEN_EXPIRY_DURATION: getEnvVariable('AUTH_TOKEN_EXPIRY_DURATION'),
-	DATABASE_USER: getEnvVariable('DATABASE_USER'),
-	DATABASE_PASSWORD: getEnvVariable('DATABASE_PASSWORD'),
-	DATABASE_PORT: parseInt(getEnvVariable('DATABASE_PORT'), 10),
-	DATABASE_NAME: getEnvVariable('DATABASE_NAME'),
-	DATABASE_SERVER: getEnvVariable('DATABASE_SERVER'),
-	AUTH_URL: getEnvVariable('AUTH_URL'),
-	USER_GROUP: getEnvVariable('USER_GROUP')
+  APP_PORT: parseInt(getEnvVariable('APP_PORT'), 10),
+  AUTH_TOKEN_SECRET: getEnvVariable('AUTH_TOKEN_SECRET'),
+  AUTH_TOKEN_EXPIRY_DURATION: getEnvVariable('AUTH_TOKEN_EXPIRY_DURATION'),
+  DATABASE_USER: getEnvVariable('DATABASE_USER'),
+  DATABASE_PASSWORD: getEnvVariable('DATABASE_PASSWORD'),
+  DATABASE_PORT: parseInt(getEnvVariable('DATABASE_PORT'), 10),
+  DATABASE_NAME: getEnvVariable('DATABASE_NAME'),
+  DATABASE_SERVER: getEnvVariable('DATABASE_SERVER'),
+  AUTH_URL: getEnvVariable('AUTH_URL'),
+  USER_GROUP: getEnvVariable('USER_GROUP')
 });

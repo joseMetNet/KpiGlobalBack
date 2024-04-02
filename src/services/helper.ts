@@ -4,26 +4,26 @@ import { config } from '../config';
 import { AuthTokenPayload } from '../interface/auth.interface';
 
 export function createAuthToken(payload: AuthTokenPayload): string {
-	return jwt.sign(payload, config.AUTH_TOKEN_SECRET, {
-		algorithm: 'HS256',
-		issuer: 'metnet',
-		audience: 'audience',
-		expiresIn: config.AUTH_TOKEN_EXPIRY_DURATION
-	}
-	);
+  return jwt.sign(payload, config.AUTH_TOKEN_SECRET, {
+    algorithm: 'HS256',
+    issuer: 'metnet',
+    audience: 'audience',
+    expiresIn: config.AUTH_TOKEN_EXPIRY_DURATION
+  }
+  );
 }
 
 export async function sendVerificationEmail(code: string, email: string): Promise<string | CustomError> {
-	try {
-		const emailBody: string = buildEmailBody(code);
-		const host: string = 'https://api.masiv.masivian.com/email/v1/delivery';
-		const options = {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				Authorization: 'Basic R2V0aW5jbG91ZC1NZXRuZXQuQXBpOjBrMmxnMkdFNlRYSA=='
-			},
-			body: `{
+  try {
+    const emailBody: string = buildEmailBody(code);
+    const host: string = 'https://api.masiv.masivian.com/email/v1/delivery';
+    const options = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Basic R2V0aW5jbG91ZC1NZXRuZXQuQXBpOjBrMmxnMkdFNlRYSA=='
+      },
+      body: `{
                     "Subject":"Activaci\u00F3n de cuenta",
                     "From":"Hone Solutions<gestiondocumental@honesolutions.com.co>",
                     "Template": {
@@ -32,19 +32,19 @@ export async function sendVerificationEmail(code: string, email: string): Promis
                     },
                     "Recipients":[{"To":"Efrain Palacios<${email}>"}]
                }`
-		};
-		const request = await fetch(host, options);
-		if (!request.ok) {
-			return CustomError.badRequest(`Error sending the verification email ${request.json}`);
-		}
-		return emailBody;
-	} catch (err: any) {
-		return CustomError.internalServer(err.message);
-	}
+    };
+    const request = await fetch(host, options);
+    if (!request.ok) {
+      return CustomError.badRequest(`Error sending the verification email ${request.json}`);
+    }
+    return emailBody;
+  } catch (err: any) {
+    return CustomError.internalServer(err.message);
+  }
 }
 
 function buildEmailBody(code: string) {
-	const body: string =
+  const body: string =
 		`
     <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>
 <html xmlns='http://www.w3.org/1999/xhtml'>
@@ -92,5 +92,5 @@ function buildEmailBody(code: string) {
   </body>
 </html>
     `;
-	return body;
+  return body;
 }
