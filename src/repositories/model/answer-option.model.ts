@@ -1,27 +1,33 @@
 import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '../../config';
+import { AnswerOptionTranslation } from './answer-option-translation.model';
 
 export class AnswerOption extends Model {
-	declare id: number;
-	declare question_id: number;
-	declare answer_option: string;
+  declare id: number;
+  declare questionId: number;
+  declare answerOptionTranslationId: number;
 }
 
 AnswerOption.init({
-	id: {
-		type: DataTypes.INTEGER,
-		primaryKey: true
-	},
-	question_id: {
-		type: DataTypes.INTEGER,
-		allowNull: false
-	},
-	answer_option: {
-		type: DataTypes.STRING,
-		allowNull: false
-	},
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true
+  },
+  questionId: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+  answerOptionTranslationId: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
 }, {
-	sequelize,
-	tableName: 'TB_Answer_Option',
-	timestamps: false
+  sequelize,
+  tableName: 'TB_AnswerOption',
+  timestamps: false
+});
+
+AnswerOption.hasOne(AnswerOptionTranslation,{
+  sourceKey: 'answerOptionTranslationId',
+  foreignKey: 'id'
 });

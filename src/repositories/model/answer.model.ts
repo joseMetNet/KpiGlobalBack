@@ -1,37 +1,39 @@
 import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '../../config';
 
-export class Answer extends Model {
-	declare id: number;
-	declare user_id: number;
-	declare question_id: number;
-	declare answer_question_id: number;
-	declare profile_id: number;
+export class UserAnswer extends Model {
+  declare id: number;
+  declare userId: number;
+  declare questionId: number;
+  declare answerOptionId: number;
+  declare openAnswerText: string;
 }
 
-Answer.init({
-	id: {
-		type: DataTypes.INTEGER,
-		primaryKey: true
-	},
-	user_id: {
-		type: DataTypes.INTEGER,
-		allowNull: false
-	},
-	profile_id: {
-		type: DataTypes.INTEGER,
-		allowNull: false
-	},
-	question_id: {
-		type: DataTypes.INTEGER,
-		allowNull: false
-	},
-	answer_option_id: {
-		type: DataTypes.INTEGER,
-		allowNull: false
-	},
+UserAnswer.init({
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true
+  },
+  userId: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+  questionId: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+  answerOptionId: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+  openAnswerText: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
 }, {
-	sequelize,
-	tableName: 'TB_User_Answer',
-	timestamps: false
+  sequelize,
+  tableName: 'TB_UserAnswer',
+  timestamps: false
 });
+
+UserAnswer.removeAttribute('id');

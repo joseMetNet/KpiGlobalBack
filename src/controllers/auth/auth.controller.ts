@@ -31,7 +31,7 @@ export async function sendVerificationEmail(req: Request, res: Response): Promis
 		return;
 	}
 	const response = await authService.sendVerificationEmail(request.data.email);
-	res.status(200).json({ status: response.status, data: response.data });
+	res.status(response.code).json({ status: response.status, data: response.data });
 }
 
 export async function verifyUser(req: Request, res: Response): Promise<void> {

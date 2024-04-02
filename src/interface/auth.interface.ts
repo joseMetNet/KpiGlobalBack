@@ -1,5 +1,6 @@
 export interface AuthTokenPayload {
 	id: number;
+  profileId?: number;
 }
 
 export interface RegisterRequest {
