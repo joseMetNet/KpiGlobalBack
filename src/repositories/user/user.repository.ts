@@ -2,6 +2,7 @@ import { CustomError } from '../../config';
 import { IUserAnswer, UserDto } from '../../interface';
 import { AnswerOptionTranslation } from '../model/answer-option-translation.model';
 import { AnswerOption } from '../model/answer-option.model';
+import { AnswerWeight } from '../model/answer-weight.model';
 import { UserAnswer } from '../model/answer.model';
 import { CategoryTranslation } from '../model/category-translation.model';
 import { Category } from '../model/category.model';
@@ -123,11 +124,37 @@ export async function findProfiles(language: string){
   return profiles;
 }
 
-export async function insertUserAnswer(answer: IUserAnswer): Promise<void>{
+export async function insertUserAnswer(answer: IUserAnswer): Promise<void> {
   await UserAnswer.create({
     userId: answer.userId,
     questionId: answer.questionId,
     answerOptionId: answer.answerOptionId,
     openAnswerText: answer.openAnswerText
+  });
+}
+
+export async function updateUserAnser(answer: IUserAnswer): Promise<void> {
+  await UserAnswer.update({
+    answerOptionId: answer.answerOptionId, 
+    openAnswerText: answer.openAnswerText
+  }, {
+    where: {
+      userId: answer.userId,
+      questionId: answer.questionId,
+    }
+  });
+}
+
+
+
+export async function findAnswerWeights(): Promise<Array<AnswerWeight>> {
+  return await AnswerWeight.findAll();
+}
+
+export async function findUserAnswers(userId: number): Promise<Array<UserAnswer>> {
+  return await UserAnswer.findAll({
+    where: {
+      userId
+    }
   });
 }

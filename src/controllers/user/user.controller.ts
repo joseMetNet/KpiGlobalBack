@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { StatusCode, StatusValue } from '../../interface';
 import { userService } from '../../services';
-import { findProfileSchema, findSurveyByProfileSchema, updateUserProfileSchema, userResponseSchema } from './user.schema';
+import { findProfileSchema, findSurveyByProfileSchema, updateUserProfileSchema, userIdSchema, userResponseSchema } from './user.schema';
 
 export async function findSurveyByProfile(req: Request, res: Response): Promise<void> {
   const request = findSurveyByProfileSchema.safeParse(req.query);
@@ -34,8 +34,12 @@ export async function findProfiles(req: Request, res: Response): Promise<void> {
     res.status(StatusCode.BadRequest).json({ status: StatusValue.Failed, data: { error: request.error.message } });
     return;
   }
+  let language = request.data.language;
+  if(!language){
+    language = 'en-EN';
+  }
 
-  const response = await userService.findProfiles(request.data.language);
+  const response = await userService.findProfiles(language);
   res.status(response.code).json({ status: response.status, data: response.data });
 }
 
@@ -48,5 +52,27 @@ export async function insertAnswers(req: Request, res: Response): Promise<void> 
   }
 
   const response = await userService.insertUserResponse(request.data);
+  res.status(response.code).json({ status: response.status, data: response.data });
+}
+
+export async function updateAnswers(req: Request, res: Response): Promise<void> {
+  const request = userResponseSchema.safeParse(req.body);
+  if (!request.success) {
+    res.status(StatusCode.BadRequest).json({ status: StatusValue.Failed, data: { error: request.error.message } });
+    return;
+  }
+
+  const response = await userService.updateUserResponse(request.data);
+  res.status(response.code).json({ status: response.status, data: response.data });
+}
+
+export async function computeScore(req: Request, res: Response): Promise<void> {
+  const request = userIdSchema.safeParse(req.query);
+  if (!request.success) {
+    res.status(StatusCode.BadRequest).json({ status: StatusValue.Failed, data: { error: request.error.message } });
+    return;
+  }
+
+  const response = await userService.computeScore(request.data.userId);
   res.status(response.code).json({ status: response.status, data: response.data });
 }
