@@ -260,7 +260,6 @@ export function userRoutes(app: Application): void {
    */
   routes.get(
     '/profile',
-    [check('language', 'language is required').notEmpty()],
     validateEndpoint,
     userController.findProfiles
   );
@@ -297,6 +296,67 @@ export function userRoutes(app: Application): void {
     '/user-response',
     validateEndpoint,
     userController.insertAnswers
+  );
+
+  /**
+   * @openapi
+   *  /v1/user/user-response:
+   *    patch:
+   *      tags: [User Controller]
+   *      summary: Update user response
+   *      requestBody:
+   *        required: true
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: array
+   *              items: 
+   *                $ref: '#/components/schemas/userResponse'
+   *      responses:
+   *        '200':
+   *          description: Successful response
+   *          content:
+   *            application/json:
+   *              schema:
+   *                $ref: '#/components/responses/successResponse'
+   *        '500':
+   *          description: Internal error server
+   *          content:
+   *            application/json:
+   *              schema:
+   *                $ref: '#/components/responses/failedResponse'
+   */
+  routes.patch(
+    '/user-response',
+    validateEndpoint,
+    userController.updateAnswers
+  );
+  /**
+   * @openapi
+   *  /v1/user/compute-score:
+   *    get:
+   *      tags: [User Controller]
+   *      summary: Compute the user score
+   *      parameters:
+   *        - $ref: "#/components/parameters/userId"
+   *      responses:
+   *        '200':
+   *          description: Successful response
+   *          content:
+   *            application/json:
+   *              schema:
+   *                $ref: '#/components/responses/successResponse'
+   *        '500':
+   *          description: Internal error server
+   *          content:
+   *            application/json:
+   *              schema:
+   *                $ref: '#/components/responses/failedResponse'
+   */
+  routes.get(
+    '/compute-score',
+    validateEndpoint,
+    userController.computeScore
   );
 
   app.use('/api/v1/user/', routes);

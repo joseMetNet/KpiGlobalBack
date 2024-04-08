@@ -100,8 +100,11 @@ export async function verifyUser(request: VerifyUserRequest): Promise<ResponseEn
     return BuildResponse.buildErrorResponse(isValid.statusCode, { error: isValid.message });
   }
 
-
-  const userId = await authRepository.findUserIdByEmail(request.email) as number; // At this point we are sure of the user existence.
+  const userId = await authRepository.findUserIdByEmail(request.email);
+  if(userId instanceof CustomError) {
+    return BuildResponse.buildErrorResponse(userId.statusCode, {error: userId.message});
+  }
+  
   const user = await userRepository.findUserById(userId) as UserDto;
   const payload: AuthTokenPayload = { id: userId, profileId: user.profileId };
   const token = helper.createAuthToken(payload);

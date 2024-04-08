@@ -11,7 +11,11 @@ export const updateUserProfileSchema = z.object({
 });
 
 export const findProfileSchema = z.object({
-  language: z.string()
+  language: z.string().optional()
+});
+
+export const userIdSchema = z.object({
+  userId: z.coerce.number()
 });
 
 const userAnswerSchema = z.object({
