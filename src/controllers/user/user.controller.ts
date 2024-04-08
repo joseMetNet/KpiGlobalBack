@@ -11,7 +11,7 @@ export async function findSurveyByProfile(req: Request, res: Response): Promise<
   }
   let language = request.data.language;
   if(!language){
-    language = 'en-EN';
+    language = 'en-US';
   }
   const response = await userService.findSurveyByProfile(request.data.profileId, language);
   res.status(response.code).json({ status: response.status, data: response.data });
@@ -36,7 +36,7 @@ export async function findProfiles(req: Request, res: Response): Promise<void> {
   }
   let language = request.data.language;
   if(!language){
-    language = 'en-EN';
+    language = 'en-US';
   }
 
   const response = await userService.findProfiles(language);
