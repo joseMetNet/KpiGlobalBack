@@ -14,7 +14,7 @@ export function userRoutes(app: Application): void {
    *      required: false
    *      in: query
    *      name: language
-   *      default: en-EN
+   *      default: en-US
    *      schema:
    *        type: string
    *      description: Language to query
