@@ -95,7 +95,8 @@ export async function findUserById(userId: number): Promise<CustomError | UserDt
 export function userToUserDto(user: User): UserDto {
   return {
     id: user.id,
-    profileId: user.profileId
+    profileId: user.profileId,
+    isRegistrationCompleted: user.isRegistrationCompleted
   };
 }
 

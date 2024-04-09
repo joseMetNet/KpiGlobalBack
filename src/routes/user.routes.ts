@@ -2,6 +2,7 @@ import { Application, Router } from 'express';
 import { check } from 'express-validator';
 import { validateEndpoint } from '../middleware/endpointValidator';
 import { userController } from '../controllers';
+import { authentication } from '../middleware/validate-token';
 
 export function userRoutes(app: Application): void {
   const routes: Router = Router();
@@ -194,6 +195,7 @@ export function userRoutes(app: Application): void {
     '/survey',
     [check('profileId', 'profileId is required').notEmpty()],
     validateEndpoint,
+    authentication,
     userController.findSurveyByProfile
   );
 
@@ -233,6 +235,7 @@ export function userRoutes(app: Application): void {
     [check('profileId', 'profileId is required').notEmpty()],
     [check('userId', 'userId is required').notEmpty()],
     validateEndpoint,
+    authentication,
     userController.updateUserProfile
   );
 
@@ -261,6 +264,7 @@ export function userRoutes(app: Application): void {
   routes.get(
     '/profile',
     validateEndpoint,
+    authentication,
     userController.findProfiles
   );
 
@@ -295,6 +299,7 @@ export function userRoutes(app: Application): void {
   routes.post(
     '/user-response',
     validateEndpoint,
+    authentication,
     userController.insertAnswers
   );
 
@@ -329,6 +334,7 @@ export function userRoutes(app: Application): void {
   routes.patch(
     '/user-response',
     validateEndpoint,
+    authentication,
     userController.updateAnswers
   );
   /**
@@ -356,6 +362,7 @@ export function userRoutes(app: Application): void {
   routes.get(
     '/compute-score',
     validateEndpoint,
+    authentication,
     userController.computeScore
   );
 

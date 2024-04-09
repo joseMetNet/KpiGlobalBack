@@ -54,7 +54,7 @@ export async function login(request: AuthRequest): Promise<ResponseEntity> {
 
   const payload: AuthTokenPayload = { id: user.id, profileId: user.profileId };
   const token = helper.createAuthToken(payload);
-  return BuildResponse.buildSuccessResponse(StatusCode.Ok, { token: token });
+  return BuildResponse.buildSuccessResponse(StatusCode.Ok, { isRegistrationCompleted: user.isRegistrationCompleted, token: token });
 }
 
 
