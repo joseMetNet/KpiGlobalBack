@@ -1,8 +1,7 @@
 import { Application, Router } from 'express';
 import { check } from 'express-validator';
-import { validateEndpoint } from '../middleware/endpointValidator';
+import { validateEndpoint, authentication } from '../middleware';
 import { userController } from '../controllers';
-import { authentication } from '../middleware/validate-token';
 
 export function userRoutes(app: Application): void {
   const routes: Router = Router();

@@ -1,5 +1,5 @@
 import { DataTypes, Model } from 'sequelize';
-import { sequelize } from '../../config';
+import { sequelize } from '../config';
 import { Language } from './language.model';
 
 export class QuestionTranslation extends Model {

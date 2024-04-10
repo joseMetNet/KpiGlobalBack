@@ -1,6 +1,6 @@
 import { IUserAnswer, ResponseEntity, StatusCode } from '../../interface';
 import { userRepository } from '../../repositories';
-import { AnswerWeight } from '../../repositories/model/answer-weight.model';
+import { AnswerWeight } from '../../models';
 import { BuildResponse } from '../BuildResponse';
 
 export async function findSurveyByProfile(profileId: number, language: string): Promise<ResponseEntity> {

@@ -1,6 +1,6 @@
 import { CustomError } from '../../config';
 import { UserDto } from '../../interface';
-import { RegisterRequest, ResponseEntity, AuthTokenPayload, AuthRequest, VerifyUserRequest, StatusCode, ChangePasswordRequest } from '../../interface/auth.interface';
+import { RegisterRequest, ResponseEntity, AuthTokenPayload, AuthRequest, VerifyUserRequest, StatusCode, ChangePasswordRequest } from '../../interface';
 import { User, VerificationStatus, authRepository, userRepository, verificationRepository } from '../../repositories';
 import { BuildResponse } from '../BuildResponse';
 import * as helper from '../helper';

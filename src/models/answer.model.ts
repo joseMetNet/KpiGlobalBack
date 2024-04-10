@@ -1,18 +1,22 @@
 import { DataTypes, Model } from 'sequelize';
-import { sequelize } from '../../config';
+import { sequelize } from '../config';
 
-export class AnswerWeight extends Model {
+export class UserAnswer extends Model {
   declare id: number;
+  declare userId: number;
   declare questionId: number;
   declare answerOptionId: number;
-  declare weight: number;
-  declare value: number;
+  declare openAnswerText: string;
 }
 
-AnswerWeight.init({
+UserAnswer.init({
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true
+  },
+  userId: {
+    type: DataTypes.INTEGER,
+    allowNull: false
   },
   questionId: {
     type: DataTypes.INTEGER,
@@ -22,16 +26,14 @@ AnswerWeight.init({
     type: DataTypes.INTEGER,
     allowNull: false
   },
-  weight: {
-    type: DataTypes.INTEGER,
-    allowNull: false
-  },
-  value: {
-    type: DataTypes.INTEGER,
+  openAnswerText: {
+    type: DataTypes.STRING,
     allowNull: false
   },
 }, {
   sequelize,
-  tableName: 'TB_Weights',
+  tableName: 'TB_UserAnswer',
   timestamps: false
 });
+
+UserAnswer.removeAttribute('id');

@@ -1,7 +1,7 @@
 import { CustomError } from '../config';
 import * as jwt from 'jsonwebtoken';
 import { config } from '../config';
-import { AuthTokenPayload } from '../interface/auth.interface';
+import { AuthTokenPayload } from '../interface';
 
 export function createAuthToken(payload: AuthTokenPayload): string {
   return jwt.sign(payload, config.AUTH_TOKEN_SECRET, {

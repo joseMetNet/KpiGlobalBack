@@ -1,5 +1,5 @@
 import { DataTypes, Model } from 'sequelize';
-import { sequelize } from '../../config';
+import { sequelize } from '../config';
 import { ProfileTranslation } from './profile-translation.model';
 
 export class Profile extends Model {

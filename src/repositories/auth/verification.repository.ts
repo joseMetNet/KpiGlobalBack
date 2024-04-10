@@ -1,5 +1,5 @@
-import { CustomError } from '../../config/CustomError';
-import { VerificationStatus } from '../model/verification.model';
+import { CustomError } from '../../config';
+import { VerificationStatus } from '../../models';
 import { VerifyUserRequest } from '../../interface';
 
 export async function createCode(email: string): Promise<string | CustomError>{
@@ -11,7 +11,6 @@ export async function createCode(email: string): Promise<string | CustomError>{
     });
     return status.code;
   }catch (err: any){
-    console.log('-----------------------');
     return CustomError.internalServer(err.message);
   }
 }

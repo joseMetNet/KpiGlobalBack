@@ -1,5 +1,5 @@
 import { DataTypes, Model } from 'sequelize';
-import { sequelize } from '../../config';
+import { sequelize } from '../config';
 import { CategoryTranslation } from './category-translation.model';
 import { Question } from './question.model';
 
