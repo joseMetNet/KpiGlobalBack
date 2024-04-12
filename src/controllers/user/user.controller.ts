@@ -17,6 +17,20 @@ export async function findSurveyByProfile(req: Request, res: Response): Promise<
   res.status(response.code).json({ status: response.status, data: response.data });
 }
 
+export async function findPartialSurvey(req: Request, res: Response): Promise<void> {
+  const request = findSurveyByProfileSchema.safeParse(req.query);
+  if (!request.success) {
+    res.status(StatusCode.BadRequest).json({ status: StatusValue.Failed, data: { error: request.error.message } });
+    return;
+  }
+  let language = request.data.language;
+  if(!language){
+    language = 'en-US';
+  }
+  const response = await userService.findAnsweredQuestions(request.data.profileId, language, request.data.userId);
+  res.status(response.code).json({ status: response.status, data: response.data });
+}
+
 export async function updateUserProfile(req: Request, res: Response): Promise<void> {
   const request = updateUserProfileSchema.safeParse(req.body);
   if (!request.success) {

@@ -26,7 +26,7 @@ export async function findSurveyByProfile(profileId: number, language: string){
       },
       {
         model: Question,
-        attributes: ['questionNumber'],
+        attributes: ['id'],
         required: true,
         include:[
           {
