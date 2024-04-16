@@ -1,4 +1,4 @@
-import { ResponseEntity, StatusValue } from '../interface/auth.interface';
+import { ResponseEntity, StatusValue } from '../interface';
 
 export class BuildResponse {
   constructor(

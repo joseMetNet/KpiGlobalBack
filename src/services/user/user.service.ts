@@ -1,6 +1,6 @@
 import { IUserAnswer, ResponseEntity, StatusCode } from '../../interface';
 import { userRepository } from '../../repositories';
-import { AnswerWeight } from '../../repositories/model/answer-weight.model';
+import {AnswerWeight } from '../../models';
 import { BuildResponse } from '../BuildResponse';
 
 export async function findSurveyByProfile(profileId: number, language: string): Promise<ResponseEntity> {
@@ -9,6 +9,7 @@ export async function findSurveyByProfile(profileId: number, language: string): 
     const categories: ICategory[] = [];
     for(const question of survey){
       const category: ICategory = {
+        id: question.get('id'),
         CategoryTranslation: question.get('CategoryTranslation') as ICategoryTranslation,
         Questions: question.get('Questions') as IQuestion[]
       };
@@ -16,11 +17,14 @@ export async function findSurveyByProfile(profileId: number, language: string): 
     }
     const response = categories.map((category: ICategory) => {
       return {
+        id: category.id,
         category: category.CategoryTranslation.category,
         questions: category.Questions.map((question: IQuestion) => {
           return {
-            questionNumber: question.questionNumber,
+            id: question.id,
             question: question.QuestionTranslation.question,
+            type: question.QuestionType.type,
+            multiple: question.QuestionType.multiple,
             answerOptions: question.AnswerOptions.map((answer: IAnswerOption) => {
               return {
                 id: answer.id,
@@ -38,6 +42,56 @@ export async function findSurveyByProfile(profileId: number, language: string): 
   }
 }
 
+export async function findAnsweredQuestions(profileId: number, language: string, userId: number): Promise<ResponseEntity> {
+  try {
+    const survey = await userRepository.findSurveyByProfile(profileId, language);
+    const categories: ICategory[] = [];
+    for(const question of survey){
+      const category: ICategory = {
+        id: question.get('id'),
+        CategoryTranslation: question.get('CategoryTranslation') as ICategoryTranslation,
+        Questions: question.get('Questions') as IQuestion[]
+      };
+      categories.push(category);
+    }
+    const questions = categories.map((category: ICategory) => {
+      return {
+        id: category.id,
+        category: category.CategoryTranslation.category,
+        questions: category.Questions.map((question: IQuestion) => {
+          return {
+            id: question.id,
+            question: question.QuestionTranslation.question,
+            type: question.QuestionType.type,
+            multiple: question.QuestionType.multiple,
+            userAnswerId: -1,
+            userAnswerText: '',
+            answerOptions: question.AnswerOptions.map((answer: IAnswerOption) => {
+              return {
+                id: answer.id,
+                answerOption: answer.AnswerOptionTranslation.answerOption,
+              };
+            }),
+          };
+        })
+      };
+    });
+    const userAnswers = await userRepository.findUserAnswers(userId);
+    for (const category of questions){
+      for (const question of category.questions){
+        for (const answer of userAnswers){
+          if (answer.questionId===question.id){
+            question.userAnswerId = answer.answerOptionId;
+            question.userAnswerText = answer.openAnswerText;
+          }
+        }
+      }
+    }
+    return BuildResponse.buildSuccessResponse(StatusCode.Ok, questions);
+  }catch (err: any) {
+    return BuildResponse.buildErrorResponse(StatusCode.InternalErrorServer, err);
+  }
+}
 
 
 export async function updateUserProfile(userId: number, profileId: number): Promise<ResponseEntity>{
@@ -106,7 +160,7 @@ export async function computeScore(userId: number): Promise<ResponseEntity> {
     }
 
     console.log(JSON.stringify(responseWeights));
-    
+
     let score = 0.0;
     for(const weight of responseWeights){
       score = score + (weight.weight*weight.value);
@@ -123,27 +177,28 @@ export async function computeScore(userId: number): Promise<ResponseEntity> {
     }
 
     return BuildResponse.buildSuccessResponse(StatusCode.Ok, {score: score, description: description});
-    
+
   }catch(err: any){
     return BuildResponse.buildErrorResponse(StatusCode.InternalErrorServer, err);
   }
 }
 
 export interface IProfile {
-    id:                 number;
-    profile:            string;
-    photoUrl:           string;
-    videoUrl:           string;
-    description:        string;
+  id:                 number;
+  profile:            string;
+  photoUrl:           string;
+  videoUrl:           string;
+  description:        string;
 }
 
 export interface IProfileTranslation {
-    profile:     string;
-    description: string;
-    videoUrl:    string;
+  profile:     string;
+  description: string;
+  videoUrl:    string;
 }
 
 interface ICategory {
+  id: number;
   CategoryTranslation: ICategoryTranslation;
   Questions: IQuestion[];
 }
@@ -152,9 +207,16 @@ interface ICategoryTranslation {
   category: string;
 }
 interface IQuestion {
-  questionNumber: number;
+  id: number;
+  QuestionType: IQuestionType;
   QuestionTranslation: IQuestionTranslation;
+  userAnswer: number;
   AnswerOptions: IAnswerOption[];
+}
+
+interface IQuestionType {
+  type: string;
+  multiple: string;
 }
 
 interface IQuestionTranslation {

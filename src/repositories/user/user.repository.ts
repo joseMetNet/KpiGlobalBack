@@ -1,21 +1,24 @@
 import { CustomError } from '../../config';
 import { IUserAnswer, UserDto } from '../../interface';
-import { AnswerOptionTranslation } from '../model/answer-option-translation.model';
-import { AnswerOption } from '../model/answer-option.model';
-import { AnswerWeight } from '../model/answer-weight.model';
-import { UserAnswer } from '../model/answer.model';
-import { CategoryTranslation } from '../model/category-translation.model';
-import { Category } from '../model/category.model';
-import { Language } from '../model/language.model';
-import { ProfileTranslation } from '../model/profile-translation.model';
-import { Profile } from '../model/profile.model';
-import { QuestionTranslation } from '../model/question-translation.model';
-import { Question } from '../model/question.model';
+import { 
+  AnswerOptionTranslation,
+  AnswerOption,
+  AnswerWeight,
+  UserAnswer,
+  CategoryTranslation,
+  Category,
+  Language,
+  ProfileTranslation,
+  Profile,
+  QuestionTranslation,
+  Question
+} from '../../models';
+import { QuestionType } from '../../models/question-type.model';
 import { User } from './user.model';
 
 export async function findSurveyByProfile(profileId: number, language: string){
   const survey = await Category.findAll({
-    attributes: [],
+    attributes: ['id'],
     include: [
       {
         model: CategoryTranslation,
@@ -24,9 +27,14 @@ export async function findSurveyByProfile(profileId: number, language: string){
       },
       {
         model: Question,
-        attributes: ['questionNumber'],
+        attributes: ['id'],
         required: true,
         include:[
+          {
+            model: QuestionType,
+            attributes: ['type', 'multiple'],
+            required: true
+          },
           {
             model: QuestionTranslation,
             attributes: ['question'],

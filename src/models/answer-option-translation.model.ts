@@ -1,13 +1,13 @@
 import { DataTypes, Model } from 'sequelize';
-import { sequelize } from '../../config';
+import { sequelize } from '../config';
 
-export class CategoryTranslation extends Model {
+export class AnswerOptionTranslation extends Model {
   declare id: number;
   declare languageId: number;
-  declare category: string;
+  declare answerOption: string;
 }
 
-CategoryTranslation.init({
+AnswerOptionTranslation.init({
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true
@@ -16,12 +16,12 @@ CategoryTranslation.init({
     type: DataTypes.INTEGER,
     allowNull: false
   },
-  category: {
+  answerOption: {
     type: DataTypes.STRING,
     allowNull: false
   },
 }, {
   sequelize,
-  tableName: 'TB_CategoryTranslation',
+  tableName: 'TB_AnswerOptionTranslation',
   timestamps: false
 });

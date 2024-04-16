@@ -1,23 +1,23 @@
 import { DataTypes, Model } from 'sequelize';
-import { sequelize } from '../../config';
+import { sequelize } from '../config';
 
-export class Rol extends Model {
+export class Language extends Model {
   declare id: number;
-  declare role: string;
+  declare language: string;
 }
 
-Rol.init({
+Language.init({
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true
   },
-  role: {
+  language: {
     type: DataTypes.STRING,
     allowNull: false,
     unique: true
   }
 }, {
   sequelize,
-  tableName: 'TB_Rol',
+  tableName: 'TB_Language',
   timestamps: false
 });

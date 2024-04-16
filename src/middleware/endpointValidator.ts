@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { validationResult } from 'express-validator';
-import { StatusValue, StatusCode } from '../interface/auth.interface';
+import { StatusValue, StatusCode } from '../interface';
 
 export const validateEndpoint = (req: Request, res: Response, next: NextFunction) => {
   const error = validationResult(req);

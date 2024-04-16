@@ -2,7 +2,12 @@ import { z } from 'zod';
 
 export const findSurveyByProfileSchema = z.object({
   profileId: z.coerce.number(),
-  language: z.string().optional()
+  language: z.string().optional(),
+});
+export const findPartialSurveyByProfileSchema = z.object({
+  profileId: z.coerce.number(),
+  language: z.string().optional(),
+  userId: z.coerce.number()
 });
 
 export const updateUserProfileSchema = z.object({

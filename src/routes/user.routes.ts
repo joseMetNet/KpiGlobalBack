@@ -1,8 +1,7 @@
 import { Application, Router } from 'express';
 import { check } from 'express-validator';
-import { validateEndpoint } from '../middleware/endpointValidator';
+import { validateEndpoint, authentication } from '../middleware';
 import { userController } from '../controllers';
-import { authentication } from '../middleware/validate-token';
 
 export function userRoutes(app: Application): void {
   const routes: Router = Router();
@@ -197,6 +196,38 @@ export function userRoutes(app: Application): void {
     validateEndpoint,
     authentication,
     userController.findSurveyByProfile
+  );
+
+  /**
+   * @openapi
+   *  /v1/user/survey-answered:
+   *    get:
+   *      tags: [User Controller]
+   *      summary: Get survey questions
+   *      parameters:
+   *        - $ref: "#/components/parameters/language"
+   *        - $ref: "#/components/parameters/profileId"
+   *        - $ref: "#/components/parameters/userId"
+   *      responses:
+   *        '200':
+   *          description: Successful response
+   *          content:
+   *            application/json:
+   *              schema:
+   *                $ref: '#/components/responses/completeSurvey'
+   *        '500':
+   *          description: Internal error server
+   *          content:
+   *            application/json:
+   *              schema:
+   *                $ref: '#/components/responses/failedResponse'
+   */
+  routes.get(
+    '/survey-answered',
+    [check('profileId', 'profileId is required').notEmpty()],
+    validateEndpoint,
+    authentication,
+    userController.findPartialSurvey
   );
 
   /**
