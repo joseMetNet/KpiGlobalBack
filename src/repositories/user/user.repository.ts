@@ -13,11 +13,12 @@ import {
   QuestionTranslation,
   Question
 } from '../../models';
+import { QuestionType } from '../../models/question-type.model';
 import { User } from './user.model';
 
 export async function findSurveyByProfile(profileId: number, language: string){
   const survey = await Category.findAll({
-    attributes: [],
+    attributes: ['id'],
     include: [
       {
         model: CategoryTranslation,
@@ -29,6 +30,11 @@ export async function findSurveyByProfile(profileId: number, language: string){
         attributes: ['id'],
         required: true,
         include:[
+          {
+            model: QuestionType,
+            attributes: ['type', 'multiple'],
+            required: true
+          },
           {
             model: QuestionTranslation,
             attributes: ['question'],

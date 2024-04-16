@@ -9,6 +9,7 @@ export async function findSurveyByProfile(profileId: number, language: string): 
     const categories: ICategory[] = [];
     for(const question of survey){
       const category: ICategory = {
+        id: question.get('id'),
         CategoryTranslation: question.get('CategoryTranslation') as ICategoryTranslation,
         Questions: question.get('Questions') as IQuestion[]
       };
@@ -16,11 +17,14 @@ export async function findSurveyByProfile(profileId: number, language: string): 
     }
     const response = categories.map((category: ICategory) => {
       return {
+        id: category.id,
         category: category.CategoryTranslation.category,
         questions: category.Questions.map((question: IQuestion) => {
           return {
             id: question.id,
             question: question.QuestionTranslation.question,
+            type: question.QuestionType.type,
+            multiple: question.QuestionType.multiple,
             answerOptions: question.AnswerOptions.map((answer: IAnswerOption) => {
               return {
                 id: answer.id,
@@ -44,6 +48,7 @@ export async function findAnsweredQuestions(profileId: number, language: string,
     const categories: ICategory[] = [];
     for(const question of survey){
       const category: ICategory = {
+        id: question.get('id'),
         CategoryTranslation: question.get('CategoryTranslation') as ICategoryTranslation,
         Questions: question.get('Questions') as IQuestion[]
       };
@@ -51,11 +56,14 @@ export async function findAnsweredQuestions(profileId: number, language: string,
     }
     const questions = categories.map((category: ICategory) => {
       return {
+        id: category.id,
         category: category.CategoryTranslation.category,
         questions: category.Questions.map((question: IQuestion) => {
           return {
             id: question.id,
             question: question.QuestionTranslation.question,
+            type: question.QuestionType.type,
+            multiple: question.QuestionType.multiple,
             userAnswerId: -1,
             userAnswerText: '',
             answerOptions: question.AnswerOptions.map((answer: IAnswerOption) => {
@@ -190,6 +198,7 @@ export interface IProfileTranslation {
 }
 
 interface ICategory {
+  id: number;
   CategoryTranslation: ICategoryTranslation;
   Questions: IQuestion[];
 }
@@ -199,9 +208,15 @@ interface ICategoryTranslation {
 }
 interface IQuestion {
   id: number;
+  QuestionType: IQuestionType;
   QuestionTranslation: IQuestionTranslation;
   userAnswer: number;
   AnswerOptions: IAnswerOption[];
+}
+
+interface IQuestionType {
+  type: string;
+  multiple: string;
 }
 
 interface IQuestionTranslation {
