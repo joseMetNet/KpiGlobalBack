@@ -17,17 +17,13 @@ AnswerOption.init({
     type: DataTypes.INTEGER,
     allowNull: false
   },
-  answerOptionTranslationId: {
-    type: DataTypes.INTEGER,
-    allowNull: false
-  },
 }, {
   sequelize,
   tableName: 'TB_AnswerOption',
   timestamps: false
 });
 
-AnswerOption.hasOne(AnswerOptionTranslation,{
-  sourceKey: 'answerOptionTranslationId',
-  foreignKey: 'id'
+AnswerOption.hasMany(AnswerOptionTranslation, {
+  sourceKey: 'id',
+  foreignKey: 'answerOptionId'
 });

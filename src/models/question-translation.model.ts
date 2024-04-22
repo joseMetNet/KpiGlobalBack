@@ -1,6 +1,7 @@
 import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '../config';
 import { Language } from './language.model';
+import { Profile } from './profile.model';
 
 export class QuestionTranslation extends Model {
   declare id: number;
@@ -17,6 +18,14 @@ QuestionTranslation.init({
     type: DataTypes.NUMBER,
     allowNull: false,
   },
+  questionId: {
+    type: DataTypes.NUMBER,
+    allowNull: false,
+  },
+  profileId: {
+    type: DataTypes.NUMBER,
+    allowNull: false,
+  },
   question: {
     type: DataTypes.STRING,
     allowNull: false
@@ -29,5 +38,10 @@ QuestionTranslation.init({
 
 QuestionTranslation.hasOne(Language, {
   sourceKey: 'languageId',
+  foreignKey: 'id'
+});
+
+QuestionTranslation.hasOne(Profile, {
+  sourceKey: 'profileId',
   foreignKey: 'id'
 });

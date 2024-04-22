@@ -13,19 +13,15 @@ Category.init({
     type: DataTypes.INTEGER,
     primaryKey: true
   },
-  categoryTranslationId: {
-    type: DataTypes.NUMBER,
-    allowNull: false
-  },
 }, {
   sequelize,
   tableName: 'TB_Category',
   timestamps: false
 });
 
-Category.hasOne(CategoryTranslation, {
-  sourceKey: 'categoryTranslationId',
-  foreignKey: 'id'
+Category.hasMany(CategoryTranslation, {
+  sourceKey: 'id',
+  foreignKey: 'categoryId'
 });
 
 Category.hasMany(Question, {

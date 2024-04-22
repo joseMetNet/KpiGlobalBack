@@ -13,10 +13,6 @@ Profile.init({
     type: DataTypes.INTEGER,
     primaryKey: true
   },
-  profileTranslationId: {
-    type: DataTypes.NUMBER,
-    allowNull: false
-  },
   photoUrl: {
     type: DataTypes.STRING,
     allowNull: false
@@ -27,7 +23,7 @@ Profile.init({
   timestamps: false
 });
 
-Profile.hasOne(ProfileTranslation, {
-  sourceKey: 'profileTranslationId',
-  foreignKey: 'id'
+Profile.hasMany(ProfileTranslation, {
+  sourceKey: 'id',
+  foreignKey: 'profileId'
 });

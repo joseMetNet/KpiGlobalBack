@@ -6,36 +6,37 @@ import { BuildResponse } from '../BuildResponse';
 export async function findSurveyByProfile(profileId: number, language: string): Promise<ResponseEntity> {
   try {
     const survey = await userRepository.findSurveyByProfile(profileId, language);
-    const categories: ICategory[] = [];
-    for(const question of survey){
-      const category: ICategory = {
-        id: question.get('id'),
-        CategoryTranslation: question.get('CategoryTranslation') as ICategoryTranslation,
-        Questions: question.get('Questions') as IQuestion[]
-      };
-      categories.push(category);
-    }
-    const response = categories.map((category: ICategory) => {
-      return {
-        id: category.id,
-        category: category.CategoryTranslation.category,
-        questions: category.Questions.map((question: IQuestion) => {
-          return {
-            id: question.id,
-            question: question.QuestionTranslation.question,
-            type: question.QuestionType.type,
-            multiple: question.QuestionType.multiple,
-            answerOptions: question.AnswerOptions.map((answer: IAnswerOption) => {
-              return {
-                id: answer.id,
-                answerOption: answer.AnswerOptionTranslation.answerOption,
-              };
-            })
-          };
-        }) 
-      };
-    });
-    return BuildResponse.buildSuccessResponse(StatusCode.Ok, response);
+    //const categories: ICategory[] = [];
+    //for(const question of survey){
+    //  const category: ICategory = {
+    //    id: question.get('id'),
+    //    CategoryTranslation: question.get('CategoryTranslation') as ICategoryTranslation,
+    //    Questions: question.get('Questions') as IQuestion[]
+    //  };
+    //  categories.push(category);
+    //}
+    //const response = categories.map((category: ICategory) => {
+    //  return {
+    //    id: category.id,
+    //    category: category.CategoryTranslation.category,
+    //    questions: category.Questions.map((question: IQuestion) => {
+    //      return {
+    //        id: question.id,
+    //        question: question.QuestionTranslation.question,
+    //        type: question.QuestionType.type,
+    //        multiple: question.QuestionType.multiple,
+    //        answerOptions: question.AnswerOptions.map((answer: IAnswerOption) => {
+    //          return {
+    //            id: answer.id,
+    //            answerOption: answer.AnswerOptionTranslation.answerOption,
+    //          };
+    //        })
+    //      };
+    //    }) 
+    //  };
+    //});
+    //return BuildResponse.buildSuccessResponse(StatusCode.Ok, response);
+    return BuildResponse.buildSuccessResponse(StatusCode.Ok, survey);
   }catch(err: any) {
     console.log(err);
     return BuildResponse.buildErrorResponse(StatusCode.InternalErrorServer, err);
@@ -89,6 +90,7 @@ export async function findAnsweredQuestions(profileId: number, language: string,
     }
     return BuildResponse.buildSuccessResponse(StatusCode.Ok, questions);
   }catch (err: any) {
+    console.log(err);
     return BuildResponse.buildErrorResponse(StatusCode.InternalErrorServer, err);
   }
 }

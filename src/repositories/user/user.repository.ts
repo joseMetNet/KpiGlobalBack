@@ -16,6 +16,67 @@ import {
 import { QuestionType } from '../../models/question-type.model';
 import { User } from './user.model';
 
+//export async function findSurveyByProfile(profileId: number, language: string){
+//  const survey = await Category.findAll({
+//    attributes: ['id'],
+//    include: [
+//      {
+//        model: CategoryTranslation,
+//        attributes: ['category'],
+//        required: true
+//      },
+//      {
+//        model: Question,
+//        attributes: ['id'],
+//        required: true,
+//        include:[
+//          {
+//            model: QuestionType,
+//            attributes: ['type', 'multiple'],
+//            required: true
+//          },
+//          {
+//            model: QuestionTranslation,
+//            attributes: ['question'],
+//            required: true,
+//            include: [
+//              {
+//                model: Language,
+//                required: true,
+//                attributes: [],
+//                where: {
+//                  language
+//                }
+//              },
+//              {
+//                model: Profile,
+//                attributes: [],
+//                required: true,
+//                where: {
+//                  id: profileId
+//                }
+//              },
+//            ],
+//          },
+//          {
+//            model: AnswerOption,
+//            attributes: ['id'],
+//            required: true,
+//            include: [
+//              {
+//                model: AnswerOptionTranslation,
+//                attributes: ['answerOption'],
+//                required: true
+//              }
+//            ],
+//          },
+//        ]
+//      }
+//    ]
+//  });
+//  return survey;
+//}
+
 export async function findSurveyByProfile(profileId: number, language: string){
   const survey = await Category.findAll({
     attributes: ['id'],
@@ -23,52 +84,42 @@ export async function findSurveyByProfile(profileId: number, language: string){
       {
         model: CategoryTranslation,
         attributes: ['category'],
-        required: true
+        required: true,
+        include: [
+          {
+            model: Language,
+            attributes: [],
+            required: true,
+            where: {
+              language
+            }
+          }
+        ]
       },
       {
         model: Question,
         attributes: ['id'],
         required: true,
-        include:[
-          {
-            model: QuestionType,
-            attributes: ['type', 'multiple'],
-            required: true
-          },
+        include: [
           {
             model: QuestionTranslation,
             attributes: ['question'],
             required: true,
-            include: [
-              {
-                model: Language,
-                required: true,
-                attributes: [],
-                where: {
-                  language
-                }
-              }
-            ],
-          },
-          {
-            model: Profile,
-            attributes: [],
-            required: true,
             where: {
-              id: profileId
+              profileId
             }
           },
           {
             model: AnswerOption,
             attributes: ['id'],
             required: true,
-            include: [
-              {
-                model: AnswerOptionTranslation,
-                attributes: ['answerOption'],
-                required: true
-              }
-            ],
+            //include: [
+            //  {
+            //    model: AnswerOptionTranslation,
+            //    attributes: ['answerOption'],
+            //    required: true,
+            //  },
+            //]
           },
         ]
       }
