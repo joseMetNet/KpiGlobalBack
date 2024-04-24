@@ -23,7 +23,7 @@ Profile.init({
   timestamps: false
 });
 
-Profile.hasMany(ProfileTranslation, {
+Profile.hasOne(ProfileTranslation, {
   sourceKey: 'id',
   foreignKey: 'profileId'
 });

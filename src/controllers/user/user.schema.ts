@@ -7,7 +7,7 @@ export const findSurveyByProfileSchema = z.object({
 export const findPartialSurveyByProfileSchema = z.object({
   profileId: z.coerce.number(),
   language: z.string().optional(),
-  userId: z.coerce.number()
+  userId: z.coerce.number().optional()
 });
 
 export const updateUserProfileSchema = z.object({

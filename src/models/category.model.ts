@@ -5,7 +5,6 @@ import { Question } from './question.model';
 
 export class Category extends Model {
   declare id: number;
-  declare categoryTranslationId: number;
 }
 
 Category.init({
@@ -19,7 +18,7 @@ Category.init({
   timestamps: false
 });
 
-Category.hasMany(CategoryTranslation, {
+Category.hasOne(CategoryTranslation, {
   sourceKey: 'id',
   foreignKey: 'categoryId'
 });

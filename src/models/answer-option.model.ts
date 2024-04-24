@@ -5,7 +5,6 @@ import { AnswerOptionTranslation } from './answer-option-translation.model';
 export class AnswerOption extends Model {
   declare id: number;
   declare questionId: number;
-  declare answerOptionTranslationId: number;
 }
 
 AnswerOption.init({
@@ -23,7 +22,7 @@ AnswerOption.init({
   timestamps: false
 });
 
-AnswerOption.hasMany(AnswerOptionTranslation, {
+AnswerOption.hasOne(AnswerOptionTranslation, {
   sourceKey: 'id',
   foreignKey: 'answerOptionId'
 });

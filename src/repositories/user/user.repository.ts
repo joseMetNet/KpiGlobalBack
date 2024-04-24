@@ -1,3 +1,4 @@
+import { Sequelize } from 'sequelize';
 import { CustomError } from '../../config';
 import { IUserAnswer, UserDto } from '../../interface';
 import { 
@@ -77,55 +78,79 @@ import { User } from './user.model';
 //  return survey;
 //}
 
-export async function findSurveyByProfile(profileId: number, language: string){
-  const survey = await Category.findAll({
-    attributes: ['id'],
+export async function findSurveyByProfile(profileId: number, language: string) {
+  const result = await Category.findAll({
     include: [
       {
         model: CategoryTranslation,
-        attributes: ['category'],
         required: true,
         include: [
           {
             model: Language,
             attributes: [],
-            required: true,
-            where: {
-              language
-            }
+            where: { language: language },
+            required: true
           }
         ]
       },
       {
         model: Question,
-        attributes: ['id'],
-        required: true,
         include: [
           {
+            model: QuestionType,
+            attributes: ['type', 'multiple'],
+            required: true
+          },
+          {
             model: QuestionTranslation,
-            attributes: ['question'],
-            required: true,
-            where: {
-              profileId
-            }
+            where: Sequelize.where(
+              Sequelize.col('[Questions->QuestionTranslation].languageId'),
+              '=',
+              Sequelize.col('[CategoryTranslation].languageId')
+            ),
+            include: [
+              {
+                model: Profile,
+                where: {
+                  id: profileId
+                },
+                required: true,
+                include: [
+                  {
+                    model: ProfileTranslation,
+                    where: Sequelize.where(
+                      Sequelize.col('[Questions->QuestionTranslation->Profile->ProfileTranslation].languageId'),
+                      '=',
+                      Sequelize.col('[Questions->QuestionTranslation].languageId')
+                    ),
+                    required: true
+                  }
+                ]
+              }
+            ],
+            required: true
           },
           {
             model: AnswerOption,
-            attributes: ['id'],
             required: true,
-            //include: [
-            //  {
-            //    model: AnswerOptionTranslation,
-            //    attributes: ['answerOption'],
-            //    required: true,
-            //  },
-            //]
+            include: [
+              {
+                model: AnswerOptionTranslation,
+                where: Sequelize.where(
+                  Sequelize.col('[Questions->AnswerOptions->AnswerOptionTranslation].languageId'),
+                  '=',
+                  Sequelize.col('[Questions->QuestionTranslation].languageId')
+                ),
+                required: true
+              }
+            ]
           },
-        ]
+        ],
+        required: true
       }
-    ]
+    ],
   });
-  return survey;
+  return result;
 }
 
 export async function updateUserProfile(userId: number, profileId: number): Promise<CustomError | void> {
