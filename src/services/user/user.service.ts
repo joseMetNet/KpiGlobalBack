@@ -1,6 +1,6 @@
 import { IUserAnswer, ResponseEntity, StatusCode } from '../../interface';
 import { userRepository } from '../../repositories';
-import {AnswerWeight } from '../../models';
+import {AnswerWeight, ProfileTranslation } from '../../models';
 import { BuildResponse } from '../BuildResponse';
 
 export async function findSurveyByProfile(profileId: number, language: string): Promise<ResponseEntity> {
@@ -64,8 +64,7 @@ export async function findAnsweredQuestions(profileId: number, language: string,
             question: question.QuestionTranslation.question,
             type: question.QuestionType.type,
             multiple: question.QuestionType.multiple,
-            userAnswerId: -1,
-            userAnswerText: '',
+            currentAnswer: <ICurrentAnswer[]>[],
             answerOptions: question.AnswerOptions.map((answer: IAnswerOption) => {
               return {
                 id: answer.id,
@@ -76,23 +75,31 @@ export async function findAnsweredQuestions(profileId: number, language: string,
         })
       };
     });
-    const userAnswers = await userRepository.findUserAnswers(userId);
+    const userAnswers = await userRepository.findUserAnswers(70);
     for (const category of questions){
       for (const question of category.questions){
         for (const answer of userAnswers){
           if (answer.questionId===question.id){
-            question.userAnswerId = answer.answerOptionId;
-            question.userAnswerText = answer.openAnswerText;
+            const response = {
+              userAnswerId: answer.answerOptionId,
+              userAnswerText: answer.openAnswerText
+            };
+            question.currentAnswer.push(response);
           }
         }
       }
     }
     return BuildResponse.buildSuccessResponse(StatusCode.Ok, questions);
   }catch (err: any) {
+    console.log(err);
     return BuildResponse.buildErrorResponse(StatusCode.InternalErrorServer, err);
   }
 }
 
+interface ICurrentAnswer {
+	userAnswerId: number;
+	userAnswerText: string;
+}
 
 export async function updateUserProfile(userId: number, profileId: number): Promise<ResponseEntity>{
   try {
@@ -128,10 +135,10 @@ export async function updateUserResponse(userResponse: IUserAnswer[]): Promise<R
 export async function findProfiles(language: string): Promise<ResponseEntity>{
   try {
     const profiles = await userRepository.findProfiles(language);
-    const response: IProfile[] = [];
+    const response = [];
     for(const profile of profiles){
       const profileTranslation = profile.get('ProfileTranslation') as IProfileTranslation;
-      const newProfile: IProfile = {
+      const newProfile = {
         id: profile.id,
         profile: profileTranslation.profile,
         photoUrl: profile.photoUrl,
@@ -185,13 +192,14 @@ export async function computeScore(userId: number): Promise<ResponseEntity> {
 
 export interface IProfile {
   id:                 number;
-  profile:            string;
   photoUrl:           string;
-  videoUrl:           string;
-  description:        string;
+	ProfileTranslation: ProfileTranslation;
 }
 
 export interface IProfileTranslation {
+	id: number;
+	languageId: number;
+	profileId: number;
   profile:     string;
   description: string;
   videoUrl:    string;
@@ -204,10 +212,15 @@ interface ICategory {
 }
 
 interface ICategoryTranslation {
+	id: number;
+	languageId: number;
+	categoryId: number;
   category: string;
 }
 interface IQuestion {
   id: number;
+	categoryId: number;
+	questionNumber: number;
   QuestionType: IQuestionType;
   QuestionTranslation: IQuestionTranslation;
   userAnswer: number;
@@ -220,14 +233,23 @@ interface IQuestionType {
 }
 
 interface IQuestionTranslation {
-  question: string
+	id: number;
+	languageId: number;
+	questionId: number;
+	profileId: number;
+  question: string;
+	Profile: IProfile;
 }
+
 interface IAnswerOption {
-  id: number,
+  id: number;
+	questionId: number;
   AnswerOptionTranslation: IAnswerOptionsTranslation
 }
 
 interface IAnswerOptionsTranslation {
   id:           number;
+	languageId: number;
+	answerOptionId: number;
   answerOption: string;
 }

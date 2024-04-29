@@ -16,6 +16,10 @@ AnswerOptionTranslation.init({
     type: DataTypes.INTEGER,
     allowNull: false
   },
+  answerOptionId: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
   answerOption: {
     type: DataTypes.STRING,
     allowNull: false

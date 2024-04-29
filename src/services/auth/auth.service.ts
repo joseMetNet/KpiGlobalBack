@@ -60,6 +60,7 @@ export async function login(request: AuthRequest): Promise<ResponseEntity> {
 
 export async function sendVerificationEmail(email: string): Promise<ResponseEntity> {
   const userExist: number | CustomError = await authRepository.findUserIdByEmail(email);
+	console.log(userExist)
   if (userExist instanceof CustomError) {
     return BuildResponse.buildErrorResponse(userExist.statusCode, { error: userExist.message });
   }

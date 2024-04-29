@@ -1,6 +1,5 @@
 import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '../config';
-import { Profile } from './profile.model';
 import { AnswerOption } from './answer-option.model';
 import { QuestionTranslation } from './question-translation.model';
 import { QuestionType } from './question-type.model';
@@ -19,15 +18,7 @@ Question.init({
     type: DataTypes.INTEGER,
     primaryKey: true
   },
-  profileId: {
-    type: DataTypes.NUMBER,
-    allowNull: false,
-  },
   categoryId: {
-    type: DataTypes.NUMBER,
-    allowNull: false,
-  },
-  questionTypeId: {
     type: DataTypes.NUMBER,
     allowNull: false,
   },
@@ -35,19 +26,14 @@ Question.init({
     type: DataTypes.NUMBER,
     allowNull: false,
   },
-  questionTranslationId: {
+  questionTypeId: {
     type: DataTypes.NUMBER,
-    allowNull: false
+    allowNull: false,
   },
 }, {
   sequelize,
   tableName: 'TB_Question',
   timestamps: false
-});
-
-Question.hasOne(Profile, {
-  sourceKey: 'profileId',
-  foreignKey: 'id'
 });
 
 Question.hasMany(AnswerOption, {
@@ -56,8 +42,8 @@ Question.hasMany(AnswerOption, {
 });
 
 Question.hasOne(QuestionTranslation, {
-  sourceKey: 'questionTranslationId',
-  foreignKey: 'id'
+  sourceKey: 'id',
+  foreignKey: 'questionId'
 });
 
 Question.hasOne(QuestionType, {

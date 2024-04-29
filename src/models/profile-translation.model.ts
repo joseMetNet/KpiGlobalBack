@@ -19,6 +19,10 @@ ProfileTranslation.init({
     type: DataTypes.INTEGER,
     allowNull: false
   },
+  profileId: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
   profile: {
     type: DataTypes.STRING,
     allowNull: false

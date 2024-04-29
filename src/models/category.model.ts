@@ -5,17 +5,12 @@ import { Question } from './question.model';
 
 export class Category extends Model {
   declare id: number;
-  declare categoryTranslationId: number;
 }
 
 Category.init({
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true
-  },
-  categoryTranslationId: {
-    type: DataTypes.NUMBER,
-    allowNull: false
   },
 }, {
   sequelize,
@@ -24,8 +19,8 @@ Category.init({
 });
 
 Category.hasOne(CategoryTranslation, {
-  sourceKey: 'categoryTranslationId',
-  foreignKey: 'id'
+  sourceKey: 'id',
+  foreignKey: 'categoryId'
 });
 
 Category.hasMany(Question, {

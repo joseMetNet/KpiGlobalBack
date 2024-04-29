@@ -10,7 +10,7 @@ export async function findSurveyByProfile(req: Request, res: Response): Promise<
     return;
   }
   let language = request.data.language;
-  if(!language){
+  if (!language) {
     language = 'en-US';
   }
   const response = await userService.findSurveyByProfile(request.data.profileId, language);
@@ -24,10 +24,10 @@ export async function findPartialSurvey(req: Request, res: Response): Promise<vo
     return;
   }
   let language = request.data.language;
-  if(!language){
+  if (!language) {
     language = 'en-US';
   }
-  const response = await userService.findAnsweredQuestions(request.data.profileId, language, 1);
+  const response = await userService.findAnsweredQuestions(request.data.profileId, language, req.body.user.id);
   res.status(response.code).json({ status: response.status, data: response.data });
 }
 
@@ -49,7 +49,7 @@ export async function findProfiles(req: Request, res: Response): Promise<void> {
     return;
   }
   let language = request.data.language;
-  if(!language){
+  if (!language) {
     language = 'en-US';
   }
 
