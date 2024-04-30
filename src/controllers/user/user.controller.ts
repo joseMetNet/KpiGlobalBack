@@ -69,17 +69,6 @@ export async function insertAnswers(req: Request, res: Response): Promise<void> 
   res.status(response.code).json({ status: response.status, data: response.data });
 }
 
-export async function updateAnswers(req: Request, res: Response): Promise<void> {
-  const request = userResponseSchema.safeParse(req.body);
-  if (!request.success) {
-    res.status(StatusCode.BadRequest).json({ status: StatusValue.Failed, data: { error: request.error.message } });
-    return;
-  }
-
-  const response = await userService.updateUserResponse(request.data);
-  res.status(response.code).json({ status: response.status, data: response.data });
-}
-
 export async function computeScore(req: Request, res: Response): Promise<void> {
   const request = userIdSchema.safeParse(req.query);
   if (!request.success) {

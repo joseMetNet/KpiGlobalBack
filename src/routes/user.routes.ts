@@ -343,40 +343,6 @@ export function userRoutes(app: Application): void {
 
   /**
 	 * @openapi
-	 *  /v1/user/user-response:
-	 *    patch:
-	 *      tags: [User Controller]
-	 *      summary: Update user response
-	 *      requestBody:
-	 *        required: true
-	 *        content:
-	 *          application/json:
-	 *            schema:
-	 *              type: array
-	 *              items: 
-	 *                $ref: '#/components/schemas/userResponse'
-	 *      responses:
-	 *        '200':
-	 *          description: Successful response
-	 *          content:
-	 *            application/json:
-	 *              schema:
-	 *                $ref: '#/components/responses/successResponse'
-	 *        '500':
-	 *          description: Internal error server
-	 *          content:
-	 *            application/json:
-	 *              schema:
-	 *                $ref: '#/components/responses/failedResponse'
-	 */
-  routes.patch(
-    '/user-response',
-    validateEndpoint,
-    authentication,
-    userController.updateAnswers
-  );
-  /**
-	 * @openapi
 	 *  /v1/user/compute-score:
 	 *    get:
 	 *      tags: [User Controller]
