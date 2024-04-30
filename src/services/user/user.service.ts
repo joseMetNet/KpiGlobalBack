@@ -2,6 +2,7 @@ import { IUserAnswer, ResponseEntity, StatusCode } from '../../interface';
 import { userRepository } from '../../repositories';
 import {AnswerWeight, ProfileTranslation } from '../../models';
 import { BuildResponse } from '../BuildResponse';
+import {existUserAnswer} from "../../repositories/user/user.repository";
 
 export async function findSurveyByProfile(profileId: number, language: string): Promise<ResponseEntity> {
   try {
@@ -75,16 +76,19 @@ export async function findAnsweredQuestions(profileId: number, language: string,
         })
       };
     });
-    const userAnswers = await userRepository.findUserAnswers(70);
-    for (const category of questions){
-      for (const question of category.questions){
-        for (const answer of userAnswers){
-          if (answer.questionId===question.id){
-            const response = {
-              userAnswerId: answer.answerOptionId,
-              userAnswerText: answer.openAnswerText
-            };
-            question.currentAnswer.push(response);
+    const userAnswers = await userRepository.findUserAnswers(userId);
+    console.log(userAnswers.map((item) => {return {userId: item.userId, questionId: item.questionId}}));
+    if(userAnswers.length !== 0){
+      for (const category of questions){
+        for (const question of category.questions){
+          for (const answer of userAnswers){
+            if (answer.questionId===question.id){
+              const response = {
+                userAnswerId: answer.answerOptionId,
+                userAnswerText: answer.openAnswerText
+              };
+              question.currentAnswer.push(response);
+            }
           }
         }
       }
@@ -113,18 +117,12 @@ export async function updateUserProfile(userId: number, profileId: number): Prom
 export async function insertUserResponse(userResponse: IUserAnswer[]): Promise<ResponseEntity>{
   try{
     for(const response of userResponse){
-      await userRepository.insertUserAnswer(response);
-    }
-    return BuildResponse.buildSuccessResponse(StatusCode.ResourceCreated, {message: 'Answer correctly saved.'});
-  }catch(err: any){
-    return BuildResponse.buildErrorResponse(StatusCode.InternalErrorServer, err.message);
-  }
-}
-
-export async function updateUserResponse(userResponse: IUserAnswer[]): Promise<ResponseEntity>{
-  try{
-    for(const response of userResponse){
-      await userRepository.updateUserAnser(response);
+      const userAnswerExist = await existUserAnswer(response);
+      if(userAnswerExist){
+        await userRepository.updateUserAnswer(response);
+      }else{
+        await userRepository.insertUserAnswer(response);
+      }
     }
     return BuildResponse.buildSuccessResponse(StatusCode.ResourceCreated, {message: 'Answer correctly saved.'});
   }catch(err: any){

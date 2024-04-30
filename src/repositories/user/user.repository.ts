@@ -218,7 +218,7 @@ export async function insertUserAnswer(answer: IUserAnswer): Promise<void> {
   });
 }
 
-export async function updateUserAnser(answer: IUserAnswer): Promise<void> {
+export async function updateUserAnswer(answer: IUserAnswer): Promise<void> {
   await UserAnswer.update({
     answerOptionId: answer.answerOptionId, 
     openAnswerText: answer.openAnswerText
@@ -228,6 +228,16 @@ export async function updateUserAnser(answer: IUserAnswer): Promise<void> {
       questionId: answer.questionId,
     }
   });
+}
+
+export async function existUserAnswer(answer: IUserAnswer): Promise<boolean> {
+  const userAnswer = await UserAnswer.findOne({
+    where: {
+      userId: answer.userId,
+      questionId: answer.questionId,
+    }
+  })
+  return !!userAnswer
 }
 
 
