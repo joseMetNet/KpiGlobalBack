@@ -12,6 +12,8 @@ interface Config {
   readonly DATABASE_SERVER: string;
 	readonly AUTH_URL: string;
 	readonly USER_GROUP: string;
+  readonly BLOB_ACCOUNT: string;
+  readonly BLOB_CONTAINER: string;
 }
 
 
@@ -33,5 +35,7 @@ export const config: Config = Object.freeze({
   DATABASE_NAME: getEnvVariable('DATABASE_NAME'),
   DATABASE_SERVER: getEnvVariable('DATABASE_SERVER'),
   AUTH_URL: getEnvVariable('AUTH_URL'),
-  USER_GROUP: getEnvVariable('USER_GROUP')
+  USER_GROUP: getEnvVariable('USER_GROUP'),
+  BLOB_ACCOUNT: getEnvVariable('BLOB_ACCOUNT'),
+  BLOB_CONTAINER: getEnvVariable('BLOB_CONTAINER')
 });
