@@ -27,7 +27,7 @@ export async function findPartialSurvey(req: Request, res: Response): Promise<vo
   if (!language) {
     language = 'en-US';
   }
-  const response = await userService.findAnsweredQuestions(request.data.profileId, language, req.body.user.id);
+  const response = await userService.findAnsweredQuestions(request.data.profileId, language, request.data.userId);
   res.status(response.code).json({ status: response.status, data: response.data });
 }
 
@@ -77,5 +77,16 @@ export async function computeScore(req: Request, res: Response): Promise<void> {
   }
 
   const response = await userService.computeScore(request.data.userId);
+  res.status(response.code).json({ status: response.status, data: response.data });
+}
+
+export async function findUserInfo(req: Request, res: Response): Promise<void> {
+  const request = userIdSchema.safeParse(req.query);
+  if (!request.success) {
+    res.status(StatusCode.BadRequest).json({ status: StatusValue.Failed, data: { error: request.error.message } });
+    return;
+  }
+
+  const response = await userService.findUserInfo(request.data.userId);
   res.status(response.code).json({ status: response.status, data: response.data });
 }

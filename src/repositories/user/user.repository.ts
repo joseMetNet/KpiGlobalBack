@@ -1,6 +1,6 @@
 import { Sequelize } from 'sequelize';
 import { CustomError } from '../../config';
-import { IUserAnswer, UserDto } from '../../interface';
+import { IUserAnswer, IUserInfo, UserDto } from '../../interface';
 import { 
   AnswerOptionTranslation,
   AnswerOption,
@@ -233,14 +233,29 @@ export async function updateUserAnswer(answer: IUserAnswer): Promise<void> {
 export async function existUserAnswer(answer: IUserAnswer): Promise<boolean> {
   const userAnswer = await UserAnswer.findOne({
     where: {
-      userId: answer.userId,
       questionId: answer.questionId,
     }
-  })
-  return !!userAnswer
+  });
+  return !!userAnswer;
 }
 
+export async function deleteUserAnswer(answer: IUserAnswer): Promise<void> {
+  await UserAnswer.destroy({
+    where: {
+      userId: answer.userId,
+    }
+  });
+}
 
+export async function findUserInfo(userId: number): Promise<IUserInfo> {
+  const user = await User.findOne({
+    where: {
+      id: userId
+    }
+  });
+
+  return {firstName: user!.firstName, lastName: user!.lastName, email: user!.email, photoUrl: 'url', globalScore: 1};
+}
 
 export async function findAnswerWeights(): Promise<Array<AnswerWeight>> {
   return await AnswerWeight.findAll();

@@ -1,7 +1,7 @@
 import { CustomError } from '../../config';
 import { UserDto } from '../../interface';
 import { RegisterRequest, ResponseEntity, AuthTokenPayload, AuthRequest, VerifyUserRequest, StatusCode, ChangePasswordRequest } from '../../interface';
-import { User, VerificationStatus, authRepository, userRepository, verificationRepository } from '../../repositories';
+import { User, VerificationStatus, authRepository, categoryRepository, userRepository, verificationRepository } from '../../repositories';
 import { BuildResponse } from '../BuildResponse';
 import * as helper from '../helper';
 
@@ -51,8 +51,11 @@ export async function login(request: AuthRequest): Promise<ResponseEntity> {
   if (user instanceof CustomError) {
     return BuildResponse.buildErrorResponse(user.statusCode, { error: user.message });
   }
-
-  const payload: AuthTokenPayload = { id: user.id, profileId: user.profileId };
+  const lastCategoryId = await categoryRepository.findLastInsertedCategory(user.id);
+  if (lastCategoryId instanceof CustomError) {
+    return BuildResponse.buildErrorResponse(lastCategoryId.statusCode, { error: lastCategoryId.message });
+  }
+  const payload: AuthTokenPayload = { id: user.id, profileId: user.profileId, lastCategoryId: lastCategoryId };
   const token = helper.createAuthToken(payload);
   return BuildResponse.buildSuccessResponse(StatusCode.Ok, { isRegistrationCompleted: user.isRegistrationCompleted, token: token });
 }
@@ -60,7 +63,6 @@ export async function login(request: AuthRequest): Promise<ResponseEntity> {
 
 export async function sendVerificationEmail(email: string): Promise<ResponseEntity> {
   const userExist: number | CustomError = await authRepository.findUserIdByEmail(email);
-	console.log(userExist)
   if (userExist instanceof CustomError) {
     return BuildResponse.buildErrorResponse(userExist.statusCode, { error: userExist.message });
   }

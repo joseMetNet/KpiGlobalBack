@@ -2,7 +2,6 @@ import { IUserAnswer, ResponseEntity, StatusCode } from '../../interface';
 import { userRepository } from '../../repositories';
 import {AnswerWeight, ProfileTranslation } from '../../models';
 import { BuildResponse } from '../BuildResponse';
-import {existUserAnswer} from "../../repositories/user/user.repository";
 
 export async function findSurveyByProfile(profileId: number, language: string): Promise<ResponseEntity> {
   try {
@@ -43,7 +42,7 @@ export async function findSurveyByProfile(profileId: number, language: string): 
   }
 }
 
-export async function findAnsweredQuestions(profileId: number, language: string, userId: number): Promise<ResponseEntity> {
+export async function findAnsweredQuestions(profileId: number, language: string, userId?: number): Promise<ResponseEntity> {
   try {
     const survey = await userRepository.findSurveyByProfile(profileId, language);
     const categories: ICategory[] = [];
@@ -76,18 +75,20 @@ export async function findAnsweredQuestions(profileId: number, language: string,
         })
       };
     });
-    const userAnswers = await userRepository.findUserAnswers(userId);
-    console.log(userAnswers.map((item) => {return {userId: item.userId, questionId: item.questionId}}));
-    if(userAnswers.length !== 0){
-      for (const category of questions){
-        for (const question of category.questions){
-          for (const answer of userAnswers){
-            if (answer.questionId===question.id){
-              const response = {
-                userAnswerId: answer.answerOptionId,
-                userAnswerText: answer.openAnswerText
-              };
-              question.currentAnswer.push(response);
+    if(userId) {
+      const userAnswers = await userRepository.findUserAnswers(userId);
+      console.log(userAnswers.map((item) => {return {userId: item.userId, questionId: item.questionId};}));
+      if(userAnswers.length !== 0){
+        for (const category of questions){
+          for (const question of category.questions){
+            for (const answer of userAnswers){
+              if (answer.questionId===question.id){
+                const response = {
+                  userAnswerId: answer.answerOptionId,
+                  userAnswerText: answer.openAnswerText
+                };
+                question.currentAnswer.push(response);
+              }
             }
           }
         }
@@ -116,13 +117,9 @@ export async function updateUserProfile(userId: number, profileId: number): Prom
 
 export async function insertUserResponse(userResponse: IUserAnswer[]): Promise<ResponseEntity>{
   try{
+    await userRepository.deleteUserAnswer(userResponse[0]);
     for(const response of userResponse){
-      const userAnswerExist = await existUserAnswer(response);
-      if(userAnswerExist){
-        await userRepository.updateUserAnswer(response);
-      }else{
-        await userRepository.insertUserAnswer(response);
-      }
+      await userRepository.insertUserAnswer(response);
     }
     return BuildResponse.buildSuccessResponse(StatusCode.ResourceCreated, {message: 'Answer correctly saved.'});
   }catch(err: any){
@@ -184,6 +181,15 @@ export async function computeScore(userId: number): Promise<ResponseEntity> {
     return BuildResponse.buildSuccessResponse(StatusCode.Ok, {score: score, description: description});
 
   }catch(err: any){
+    return BuildResponse.buildErrorResponse(StatusCode.InternalErrorServer, err);
+  }
+}
+
+export async function findUserInfo(userId: number): Promise<ResponseEntity> {
+  try {
+    const info = await userRepository.findUserInfo(userId);
+    return BuildResponse.buildSuccessResponse(StatusCode.Ok, info);
+  }catch(err: any) {
     return BuildResponse.buildErrorResponse(StatusCode.InternalErrorServer, err);
   }
 }
