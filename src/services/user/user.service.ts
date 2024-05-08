@@ -1,13 +1,15 @@
-import { IUserAnswer, ResponseEntity, StatusCode } from '../../interface';
+import { CustomError } from '../../config';
+import { IUserAnswer, IUserUpdate, ResponseEntity, StatusCode } from '../../interface';
+import { AnswerWeight, ProfileTranslation } from '../../models';
 import { userRepository } from '../../repositories';
-import {AnswerWeight, ProfileTranslation } from '../../models';
 import { BuildResponse } from '../BuildResponse';
+import { uploadFile } from '../helper';
 
 export async function findSurveyByProfile(profileId: number, language: string): Promise<ResponseEntity> {
   try {
     const survey = await userRepository.findSurveyByProfile(profileId, language);
     const categories: ICategory[] = [];
-    for(const question of survey){
+    for (const question of survey) {
       const category: ICategory = {
         id: question.get('id'),
         CategoryTranslation: question.get('CategoryTranslation') as ICategoryTranslation,
@@ -32,11 +34,11 @@ export async function findSurveyByProfile(profileId: number, language: string): 
               };
             })
           };
-        }) 
+        })
       };
     });
     return BuildResponse.buildSuccessResponse(StatusCode.Ok, response);
-  }catch(err: any) {
+  } catch (err: any) {
     console.log(err);
     return BuildResponse.buildErrorResponse(StatusCode.InternalErrorServer, err);
   }
@@ -46,7 +48,7 @@ export async function findAnsweredQuestions(profileId: number, language: string,
   try {
     const survey = await userRepository.findSurveyByProfile(profileId, language);
     const categories: ICategory[] = [];
-    for(const question of survey){
+    for (const question of survey) {
       const category: ICategory = {
         id: question.get('id'),
         CategoryTranslation: question.get('CategoryTranslation') as ICategoryTranslation,
@@ -75,14 +77,14 @@ export async function findAnsweredQuestions(profileId: number, language: string,
         })
       };
     });
-    if(userId) {
+    if (userId) {
       const userAnswers = await userRepository.findUserAnswers(userId);
-      console.log(userAnswers.map((item) => {return {userId: item.userId, questionId: item.questionId};}));
-      if(userAnswers.length !== 0){
-        for (const category of questions){
-          for (const question of category.questions){
-            for (const answer of userAnswers){
-              if (answer.questionId===question.id){
+      console.log(userAnswers.map((item) => { return { userId: item.userId, questionId: item.questionId }; }));
+      if (userAnswers.length !== 0) {
+        for (const category of questions) {
+          for (const question of category.questions) {
+            for (const answer of userAnswers) {
+              if (answer.questionId === question.id) {
                 const response = {
                   userAnswerId: answer.answerOptionId,
                   userAnswerText: answer.openAnswerText
@@ -95,43 +97,43 @@ export async function findAnsweredQuestions(profileId: number, language: string,
       }
     }
     return BuildResponse.buildSuccessResponse(StatusCode.Ok, questions);
-  }catch (err: any) {
+  } catch (err: any) {
     console.log(err);
     return BuildResponse.buildErrorResponse(StatusCode.InternalErrorServer, err);
   }
 }
 
 interface ICurrentAnswer {
-	userAnswerId: number;
-	userAnswerText: string;
+  userAnswerId: number;
+  userAnswerText: string;
 }
 
-export async function updateUserProfile(userId: number, profileId: number): Promise<ResponseEntity>{
+export async function updateUserProfile(userId: number, profileId: number): Promise<ResponseEntity> {
   try {
     await userRepository.updateUserProfile(userId, profileId);
-    return BuildResponse.buildSuccessResponse(StatusCode.Ok, {message: 'User profile updated'});
-  }catch(err: any){
+    return BuildResponse.buildSuccessResponse(StatusCode.Ok, { message: 'User profile updated' });
+  } catch (err: any) {
     return BuildResponse.buildErrorResponse(StatusCode.InternalErrorServer, err);
   }
 }
 
-export async function insertUserResponse(userResponse: IUserAnswer[]): Promise<ResponseEntity>{
-  try{
+export async function insertUserResponse(userResponse: IUserAnswer[]): Promise<ResponseEntity> {
+  try {
     await userRepository.deleteUserAnswer(userResponse[0]);
-    for(const response of userResponse){
+    for (const response of userResponse) {
       await userRepository.insertUserAnswer(response);
     }
-    return BuildResponse.buildSuccessResponse(StatusCode.ResourceCreated, {message: 'Answer correctly saved.'});
-  }catch(err: any){
+    return BuildResponse.buildSuccessResponse(StatusCode.ResourceCreated, { message: 'Answer correctly saved.' });
+  } catch (err: any) {
     return BuildResponse.buildErrorResponse(StatusCode.InternalErrorServer, err.message);
   }
 }
 
-export async function findProfiles(language: string): Promise<ResponseEntity>{
+export async function findProfiles(language: string): Promise<ResponseEntity> {
   try {
     const profiles = await userRepository.findProfiles(language);
     const response = [];
-    for(const profile of profiles){
+    for (const profile of profiles) {
       const profileTranslation = profile.get('ProfileTranslation') as IProfileTranslation;
       const newProfile = {
         id: profile.id,
@@ -143,7 +145,7 @@ export async function findProfiles(language: string): Promise<ResponseEntity>{
       response.push(newProfile);
     }
     return BuildResponse.buildSuccessResponse(StatusCode.Ok, response);
-  }catch(err: any){
+  } catch (err: any) {
     return BuildResponse.buildErrorResponse(StatusCode.InternalErrorServer, err);
   }
 }
@@ -153,9 +155,9 @@ export async function computeScore(userId: number): Promise<ResponseEntity> {
     const weights = await userRepository.findAnswerWeights();
     const userAnswers = await userRepository.findUserAnswers(userId);
     const responseWeights = Array<AnswerWeight>();
-    for(const answer of userAnswers){
-      for(const weight of weights){
-        if(weight.answerOptionId===answer.answerOptionId && weight.questionId===answer.questionId){
+    for (const answer of userAnswers) {
+      for (const weight of weights) {
+        if (weight.answerOptionId === answer.answerOptionId && weight.questionId === answer.questionId) {
           responseWeights.push(weight);
         }
       }
@@ -164,23 +166,23 @@ export async function computeScore(userId: number): Promise<ResponseEntity> {
     console.log(JSON.stringify(responseWeights));
 
     let score = 0.0;
-    for(const weight of responseWeights){
-      score = score + (weight.weight*weight.value);
+    for (const weight of responseWeights) {
+      score = score + (weight.weight * weight.value);
     }
     let description = '';
-    if(score <2){
+    if (score < 2) {
       description = 'Por mejorar';
-    }else if(score>=2 && score<5){
+    } else if (score >= 2 && score < 5) {
       description = 'Regular';
-    }else if(score>=5 && score<7.5){
+    } else if (score >= 5 && score < 7.5) {
       description = 'Bueno';
-    }else{
+    } else {
       description = 'Excelente';
     }
 
-    return BuildResponse.buildSuccessResponse(StatusCode.Ok, {score: score, description: description});
+    return BuildResponse.buildSuccessResponse(StatusCode.Ok, { score: score, description: description });
 
-  }catch(err: any){
+  } catch (err: any) {
     return BuildResponse.buildErrorResponse(StatusCode.InternalErrorServer, err);
   }
 }
@@ -188,25 +190,47 @@ export async function computeScore(userId: number): Promise<ResponseEntity> {
 export async function findUserInfo(userId: number): Promise<ResponseEntity> {
   try {
     const info = await userRepository.findUserInfo(userId);
-    return BuildResponse.buildSuccessResponse(StatusCode.Ok, info);
-  }catch(err: any) {
+    if(info instanceof CustomError) {
+      return BuildResponse.buildErrorResponse(info.statusCode, { message: info.message });
+    }
+    const scoreInfo = {equipo: 1, oportunidad: 1, mercado: 1, resultadosFinancieros: 1, gobiernoCorporativo: 1, impactoSocial: 1, valores: 1, tecnologia: 1} ;
+    const globalScore = await computeScore(userId);
+    return BuildResponse.buildSuccessResponse(StatusCode.Ok, {info, globaScore: globalScore.data, scoreInfo});
+  } catch (err: any) {
+    return BuildResponse.buildErrorResponse(StatusCode.InternalErrorServer, err);
+  }
+}
+
+export async function updateUser(user: IUserUpdate, filePath: string): Promise<ResponseEntity> {
+  try {
+    const uploadResponse = await uploadFile(user.userId, filePath);
+    if(uploadResponse instanceof CustomError) {
+      return BuildResponse.buildErrorResponse(StatusCode.BadRequest, { message: uploadResponse.message });
+    }
+    const userDb = await userRepository.updateUser(user);
+    if (userDb instanceof CustomError) {
+      return BuildResponse.buildErrorResponse(userDb.statusCode, { message: userDb.message });
+    }
+
+    return BuildResponse.buildSuccessResponse(StatusCode.Ok, { message: userDb });
+  } catch (err: any) {
     return BuildResponse.buildErrorResponse(StatusCode.InternalErrorServer, err);
   }
 }
 
 export interface IProfile {
-  id:                 number;
-  photoUrl:           string;
-	ProfileTranslation: ProfileTranslation;
+  id: number;
+  photoUrl: string;
+  ProfileTranslation: ProfileTranslation;
 }
 
 export interface IProfileTranslation {
-	id: number;
-	languageId: number;
-	profileId: number;
-  profile:     string;
+  id: number;
+  languageId: number;
+  profileId: number;
+  profile: string;
   description: string;
-  videoUrl:    string;
+  videoUrl: string;
 }
 
 interface ICategory {
@@ -216,15 +240,15 @@ interface ICategory {
 }
 
 interface ICategoryTranslation {
-	id: number;
-	languageId: number;
-	categoryId: number;
+  id: number;
+  languageId: number;
+  categoryId: number;
   category: string;
 }
 interface IQuestion {
   id: number;
-	categoryId: number;
-	questionNumber: number;
+  categoryId: number;
+  questionNumber: number;
   QuestionType: IQuestionType;
   QuestionTranslation: IQuestionTranslation;
   userAnswer: number;
@@ -237,23 +261,23 @@ interface IQuestionType {
 }
 
 interface IQuestionTranslation {
-	id: number;
-	languageId: number;
-	questionId: number;
-	profileId: number;
+  id: number;
+  languageId: number;
+  questionId: number;
+  profileId: number;
   question: string;
-	Profile: IProfile;
+  Profile: IProfile;
 }
 
 interface IAnswerOption {
   id: number;
-	questionId: number;
+  questionId: number;
   AnswerOptionTranslation: IAnswerOptionsTranslation
 }
 
 interface IAnswerOptionsTranslation {
-  id:           number;
-	languageId: number;
-	answerOptionId: number;
+  id: number;
+  languageId: number;
+  answerOptionId: number;
   answerOption: string;
 }

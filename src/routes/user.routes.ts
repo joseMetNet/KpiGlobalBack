@@ -1,7 +1,7 @@
 import { Application, Router } from 'express';
 import { check } from 'express-validator';
-import { validateEndpoint, authentication } from '../middleware';
 import { userController } from '../controllers';
+import { authentication, validateEndpoint } from '../middleware';
 
 export function userRoutes(app: Application): void {
   const routes: Router = Router();
@@ -406,7 +406,7 @@ export function userRoutes(app: Application): void {
     [check('userId', 'userId is required').notEmpty(), validateEndpoint],
     validateEndpoint,
     authentication,
-    userController.findUserInfo
+    userController.findUser
   );
   app.use('/api/v1/user', routes);
 
@@ -417,15 +417,20 @@ export function userRoutes(app: Application): void {
    *      tags: [User Controller]
    *      summary: Update user information
    *      requestBody:
-   *        required: true
    *        content:
-   *          application/json:
+   *          multipart/form-data:
    *            schema:
-   *              $ref: '#/components/schemas/updateUserSchema'
-   *          image/png:
-   *            schema:
-   *              type: string
-   *              format: binary
+   *              type: object
+   *              properties:
+   *                userId:
+   *                  type: number
+   *                firstName:
+   *                  type: number
+   *                lastName:
+   *                  type: number
+   *                fileName:
+   *                  type: string
+   *                  format: binary
    *      responses:
    *        '200':
    *          description: Successful response
@@ -433,19 +438,13 @@ export function userRoutes(app: Application): void {
    *            application/json:
    *              schema:
    *                $ref: '#/components/responses/successResponse'
-   *        '500':
-   *          description: Internal error server
-   *          content:
-   *            application/json:
-   *              schema:
-   *                $ref: '#/components/responses/failedResponse'
    */
   routes.patch(
     '/',
     [check('userId', 'userId is required').notEmpty(), validateEndpoint],
     validateEndpoint,
-    authentication,
-    userController.findUserInfo
+    //authentication,
+    userController.updateUser
   );
   app.use('/api/v1/user/', routes);
 }

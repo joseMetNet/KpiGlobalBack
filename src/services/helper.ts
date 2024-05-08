@@ -1,9 +1,11 @@
 import { CustomError } from '../config';
 import * as jwt from 'jsonwebtoken';
 import { config } from '../config';
-import { AuthTokenPayload } from '../interface';
+import { AuthTokenPayload, StatusCode } from '../interface';
 import { DefaultAzureCredential } from '@azure/identity';
-import { BlobServiceClient } from '@azure/storage-blob';
+import { BlobServiceClient, BlobUploadCommonResponse } from '@azure/storage-blob';
+import { FileArray } from 'express-fileupload';
+import { BuildResponse } from './BuildResponse';
 
 export function createAuthToken(payload: AuthTokenPayload): string {
   return jwt.sign(payload, config.AUTH_TOKEN_SECRET, {
@@ -45,18 +47,22 @@ export async function sendVerificationEmail(code: string, email: string): Promis
   }
 }
 
-export async function uploadFile(userId: number) {
-  const defaultAzureCredential = new DefaultAzureCredential();
-  const blobServiceClient = new BlobServiceClient(
-    `https://${config.BLOB_ACCOUNT}.blob.core.windows.net`,
-    defaultAzureCredential
-  );
-  const containerClient = blobServiceClient.getContainerClient(config.BLOB_CONTAINER);
-  const blobName = `${userId}.png`;
-  const blockBlobClient = containerClient.getBlockBlobClient(blobName);
-  const content = '';
-  //const uploadBlobResponse = await blockBlobClient.uploadFile(content, content.length);
-  console.log(`Upload block blob ${blobName} successfully`);
+export async function uploadFile(userId: number, filePath: string): Promise<CustomError | BlobUploadCommonResponse> {
+  try {
+    const defaultAzureCredential = new DefaultAzureCredential();
+    const blobServiceClient = new BlobServiceClient(
+      `https://${config.AZURE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net`,
+      defaultAzureCredential
+    );
+    const containerClient = blobServiceClient.getContainerClient(config.AZURE_STORAGE_CONTAINER_NAME);
+    const blobName = `${userId}.png`;
+    const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+    const uploadBlobResponse = await blockBlobClient.uploadFile(filePath);
+    return uploadBlobResponse;
+  }catch(err: any){
+    console.log(err);
+    return CustomError.internalServer(err);   
+  }
 }
 
 function buildEmailBody(code: string) {

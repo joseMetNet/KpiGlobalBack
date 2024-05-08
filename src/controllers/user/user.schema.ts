@@ -23,6 +23,12 @@ export const userIdSchema = z.object({
   userId: z.coerce.number()
 });
 
+export const updateUserSchema = z.object({
+  userId: z.coerce.number(),
+  firstName: z.string(),
+  lastName: z.string()
+});
+
 const userAnswerSchema = z.object({
   userId: z.coerce.number(),
   questionId: z.coerce.number(),
