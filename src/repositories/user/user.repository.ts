@@ -1,82 +1,21 @@
 import { Sequelize } from 'sequelize';
 import { CustomError } from '../../config';
-import { IUserAnswer, IUserInfo, UserDto } from '../../interface';
-import { 
-  AnswerOptionTranslation,
+import { IUserAnswer, IUserInfo, IUserUpdate, UserDto } from '../../interface';
+import {
   AnswerOption,
+  AnswerOptionTranslation,
   AnswerWeight,
-  UserAnswer,
-  CategoryTranslation,
   Category,
+  CategoryTranslation,
   Language,
-  ProfileTranslation,
   Profile,
+  ProfileTranslation,
+  Question,
   QuestionTranslation,
-  Question
+  UserAnswer
 } from '../../models';
 import { QuestionType } from '../../models/question-type.model';
 import { User } from './user.model';
-
-//export async function findSurveyByProfile(profileId: number, language: string){
-//  const survey = await Category.findAll({
-//    attributes: ['id'],
-//    include: [
-//      {
-//        model: CategoryTranslation,
-//        attributes: ['category'],
-//        required: true
-//      },
-//      {
-//        model: Question,
-//        attributes: ['id'],
-//        required: true,
-//        include:[
-//          {
-//            model: QuestionType,
-//            attributes: ['type', 'multiple'],
-//            required: true
-//          },
-//          {
-//            model: QuestionTranslation,
-//            attributes: ['question'],
-//            required: true,
-//            include: [
-//              {
-//                model: Language,
-//                required: true,
-//                attributes: [],
-//                where: {
-//                  language
-//                }
-//              },
-//              {
-//                model: Profile,
-//                attributes: [],
-//                required: true,
-//                where: {
-//                  id: profileId
-//                }
-//              },
-//            ],
-//          },
-//          {
-//            model: AnswerOption,
-//            attributes: ['id'],
-//            required: true,
-//            include: [
-//              {
-//                model: AnswerOptionTranslation,
-//                attributes: ['answerOption'],
-//                required: true
-//              }
-//            ],
-//          },
-//        ]
-//      }
-//    ]
-//  });
-//  return survey;
-//}
 
 export async function findSurveyByProfile(profileId: number, language: string) {
   const result = await Category.findAll({
@@ -156,12 +95,32 @@ export async function findSurveyByProfile(profileId: number, language: string) {
 export async function updateUserProfile(userId: number, profileId: number): Promise<CustomError | void> {
   try {
     await User.update(
-      { profileId},{
+      { profileId }, {
         where: {
           id: userId
         }
       }
     );
+  } catch (err: any) {
+    return CustomError.badRequest(err.message);
+  }
+}
+
+export async function updateUser(user: IUserUpdate): Promise<CustomError | string> {
+  try {
+    console.log(user);
+    await User.update(
+      {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        photoUrl: `https://kpiglobal.blob.core.windows.net/profile-images/${user.userId}.png`
+      }, {
+        where: {
+          id: user.userId
+        }
+      }
+    );
+    return 'Sucessfully update';
   } catch (err: any) {
     return CustomError.badRequest(err.message);
   }
@@ -185,7 +144,7 @@ export function userToUserDto(user: User): UserDto {
 }
 
 
-export async function findProfiles(language: string){
+export async function findProfiles(language: string) {
   const profiles = await Profile.findAll({
     attributes: ['id', 'photoUrl'],
     include: [
@@ -220,7 +179,7 @@ export async function insertUserAnswer(answer: IUserAnswer): Promise<void> {
 
 export async function updateUserAnswer(answer: IUserAnswer): Promise<void> {
   await UserAnswer.update({
-    answerOptionId: answer.answerOptionId, 
+    answerOptionId: answer.answerOptionId,
     openAnswerText: answer.openAnswerText
   }, {
     where: {
@@ -239,6 +198,7 @@ export async function existUserAnswer(answer: IUserAnswer): Promise<boolean> {
   return !!userAnswer;
 }
 
+
 export async function deleteUserAnswer(answer: IUserAnswer): Promise<void> {
   await UserAnswer.destroy({
     where: {
@@ -247,14 +207,19 @@ export async function deleteUserAnswer(answer: IUserAnswer): Promise<void> {
   });
 }
 
-export async function findUserInfo(userId: number): Promise<IUserInfo> {
-  const user = await User.findOne({
-    where: {
-      id: userId
-    }
-  });
+export async function findUserInfo(userId: number): Promise<IUserInfo | CustomError> {
+  try {
+    const user = await User.findOne({
+      where: {
+        id: userId
+      }
+    });
 
-  return {firstName: user!.firstName, lastName: user!.lastName, email: user!.email, photoUrl: 'url', globalScore: 1};
+    return { firstName: user!.firstName, lastName: user!.lastName, email: user!.email, photoUrl: 'url' };
+
+  }catch(err: any) {
+    return CustomError.internalServer(err);
+  }
 }
 
 export async function findAnswerWeights(): Promise<Array<AnswerWeight>> {

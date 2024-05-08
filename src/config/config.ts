@@ -12,8 +12,8 @@ interface Config {
   readonly DATABASE_SERVER: string;
 	readonly AUTH_URL: string;
 	readonly USER_GROUP: string;
-  readonly BLOB_ACCOUNT: string;
-  readonly BLOB_CONTAINER: string;
+  readonly AZURE_STORAGE_ACCOUNT_NAME: string;
+  readonly AZURE_STORAGE_CONTAINER_NAME: string;
 }
 
 
@@ -36,6 +36,6 @@ export const config: Config = Object.freeze({
   DATABASE_SERVER: getEnvVariable('DATABASE_SERVER'),
   AUTH_URL: getEnvVariable('AUTH_URL'),
   USER_GROUP: getEnvVariable('USER_GROUP'),
-  BLOB_ACCOUNT: getEnvVariable('BLOB_ACCOUNT'),
-  BLOB_CONTAINER: getEnvVariable('BLOB_CONTAINER')
+  AZURE_STORAGE_ACCOUNT_NAME: getEnvVariable('AZURE_STORAGE_ACCOUNT_NAME'),
+  AZURE_STORAGE_CONTAINER_NAME: getEnvVariable('AZURE_STORAGE_CONTAINER_NAME')
 });

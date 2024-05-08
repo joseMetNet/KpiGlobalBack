@@ -1,7 +1,16 @@
 import { Request, Response } from 'express';
 import { StatusCode, StatusValue } from '../../interface';
 import { userService } from '../../services';
-import { findPartialSurveyByProfileSchema, findProfileSchema, findSurveyByProfileSchema, updateUserProfileSchema, userIdSchema, userResponseSchema } from './user.schema';
+import { 
+  findPartialSurveyByProfileSchema, 
+  findProfileSchema, 
+  findSurveyByProfileSchema, 
+  updateUserProfileSchema, 
+  updateUserSchema, 
+  userIdSchema, 
+  userResponseSchema 
+} from './user.schema';
+import { UploadedFile } from 'express-fileupload';
 
 export async function findSurveyByProfile(req: Request, res: Response): Promise<void> {
   const request = findSurveyByProfileSchema.safeParse(req.query);
@@ -64,7 +73,6 @@ export async function insertAnswers(req: Request, res: Response): Promise<void> 
     res.status(StatusCode.BadRequest).json({ status: StatusValue.Failed, data: { error: request.error.message } });
     return;
   }
-
   const response = await userService.insertUserResponse(request.data);
   res.status(response.code).json({ status: response.status, data: response.data });
 }
@@ -80,7 +88,7 @@ export async function computeScore(req: Request, res: Response): Promise<void> {
   res.status(response.code).json({ status: response.status, data: response.data });
 }
 
-export async function findUserInfo(req: Request, res: Response): Promise<void> {
+export async function findUser(req: Request, res: Response): Promise<void> {
   const request = userIdSchema.safeParse(req.query);
   if (!request.success) {
     res.status(StatusCode.BadRequest).json({ status: StatusValue.Failed, data: { error: request.error.message } });
@@ -88,5 +96,20 @@ export async function findUserInfo(req: Request, res: Response): Promise<void> {
   }
 
   const response = await userService.findUserInfo(request.data.userId);
+  res.status(response.code).json({ status: response.status, data: response.data });
+}
+
+export async function updateUser(req: Request, res: Response): Promise<void> {
+  const request = updateUserSchema.safeParse(req.body);
+  if (!request.success) {
+    res.status(StatusCode.BadRequest).json({ status: StatusValue.Failed, data: { error: request.error.message } });
+    return;
+  }
+  if(req.files == null){
+    res.status(StatusCode.BadRequest).json({ status: StatusValue.Failed, data: { error: 'file is required' } });
+    return;
+  }
+  const filePath = req.files.fileName as UploadedFile;
+  const response = await userService.updateUser(request.data, filePath.tempFilePath);
   res.status(response.code).json({ status: response.status, data: response.data });
 }

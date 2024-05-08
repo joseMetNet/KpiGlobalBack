@@ -8,6 +8,7 @@ export class User extends Model {
   declare email: string;
   declare phone: string | null;
   declare age: string | null;
+  declare photoUrl: string | null;
   declare roleId: number;
   declare profileId: number;
   declare isRegistrationCompleted: number;
@@ -35,6 +36,9 @@ User.init({
     type: DataTypes.STRING
   },
   age: {
+    type: DataTypes.STRING
+  },
+  photoUrl: {
     type: DataTypes.STRING
   },
   roleId: {

@@ -16,5 +16,10 @@ export interface IUserInfo {
   lastName: string;
   email: string;
   photoUrl: string;
-  globalScore: number;
+}
+
+export interface IUserUpdate {
+  userId: number;
+  firstName: string;
+  lastName: string;
 }
