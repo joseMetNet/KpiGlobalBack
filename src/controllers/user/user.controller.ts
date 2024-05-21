@@ -1,16 +1,16 @@
 import { Request, Response } from 'express';
+import { UploadedFile } from 'express-fileupload';
 import { StatusCode, StatusValue } from '../../interface';
 import { userService } from '../../services';
-import { 
-  findPartialSurveyByProfileSchema, 
-  findProfileSchema, 
-  findSurveyByProfileSchema, 
-  updateUserProfileSchema, 
-  updateUserSchema, 
-  userIdSchema, 
-  userResponseSchema 
+import {
+  findPartialSurveyByProfileSchema,
+  findProfileSchema,
+  findSurveyByProfileSchema,
+  updateUserProfileSchema,
+  updateUserSchema,
+  userIdSchema,
+  userResponseSchema
 } from './user.schema';
-import { UploadedFile } from 'express-fileupload';
 
 export async function findSurveyByProfile(req: Request, res: Response): Promise<void> {
   const request = findSurveyByProfileSchema.safeParse(req.query);
@@ -94,8 +94,7 @@ export async function findUser(req: Request, res: Response): Promise<void> {
     res.status(StatusCode.BadRequest).json({ status: StatusValue.Failed, data: { error: request.error.message } });
     return;
   }
-
-  const response = await userService.findUserInfo(request.data.userId);
+  const response = await userService.findUserInfo(request.data.userId, req.body.user.profileId);
   res.status(response.code).json({ status: response.status, data: response.data });
 }
 
@@ -105,7 +104,7 @@ export async function updateUser(req: Request, res: Response): Promise<void> {
     res.status(StatusCode.BadRequest).json({ status: StatusValue.Failed, data: { error: request.error.message } });
     return;
   }
-  if(req.files == null){
+  if (req.files == null) {
     res.status(StatusCode.BadRequest).json({ status: StatusValue.Failed, data: { error: 'file is required' } });
     return;
   }
