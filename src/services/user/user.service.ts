@@ -79,7 +79,6 @@ export async function findAnsweredQuestions(profileId: number, language: string,
     });
     if (userId) {
       const userAnswers = await userRepository.findUserAnswers(userId);
-      console.log(userAnswers.map((item) => { return { userId: item.userId, questionId: item.questionId }; }));
       if (userAnswers.length !== 0) {
         for (const category of questions) {
           for (const question of category.questions) {
@@ -119,10 +118,10 @@ export async function updateUserProfile(userId: number, profileId: number): Prom
 
 export async function insertUserResponse(userResponse: IUserAnswer[]): Promise<ResponseEntity> {
   try {
-    await userRepository.deleteUserAnswer(userResponse[0]);
-    for (const response of userResponse) {
-      await userRepository.insertUserAnswer(response);
-    }
+    const userDeletePromises = userResponse.map(item => userRepository.deleteUserAnswer(item));
+    await Promise.all(userDeletePromises);
+    const userInsertPromises = userResponse.map(item => userRepository.insertUserAnswer(item));
+    await Promise.all(userInsertPromises);
     return BuildResponse.buildSuccessResponse(StatusCode.ResourceCreated, { message: 'Answer correctly saved.' });
   } catch (err: any) {
     return BuildResponse.buildErrorResponse(StatusCode.InternalErrorServer, err.message);
@@ -163,8 +162,6 @@ export async function computeScore(userId: number): Promise<ResponseEntity> {
       }
     }
 
-    console.log(JSON.stringify(responseWeights));
-
     let score = 0.0;
     for (const weight of responseWeights) {
       score = score + (weight.weight * weight.value);
@@ -187,15 +184,77 @@ export async function computeScore(userId: number): Promise<ResponseEntity> {
   }
 }
 
-export async function findUserInfo(userId: number): Promise<ResponseEntity> {
+export async function findScoreByCategory(userId: number, profileId: number) {
+  try {
+    const survey = await userRepository.findSurveyByProfile(profileId, 'en-US');
+    const weights = await userRepository.findAnswerWeights();
+    const userAnswers = await userRepository.findUserAnswers(userId);
+
+    const categories: ICategory[] = [];
+    for (const category of survey) {
+      const newCategory: ICategory = {
+        id: category.get('id'),
+        CategoryTranslation: category.get('CategoryTranslation') as ICategoryTranslation,
+        Questions: category.get('Questions') as IQuestion[],
+        score: 0.0
+      };
+      categories.push(newCategory);
+    }
+
+    const question = categories.map((category: ICategory) => {
+      const categoryScore = category.Questions.reduce((score, question) => {
+        const userAnswer = userAnswers.find(answer => answer.questionId === question.id);
+        if (userAnswer) {
+          const weight = weights.find(weight => weight.answerOptionId === userAnswer.answerOptionId && weight.questionId === userAnswer.questionId);
+          if (weight) {
+            score += weight.weight * weight.value;
+          }
+        }
+        return score;
+      }, 0);
+      return {
+        category: category.CategoryTranslation.category,
+        categoryScore: categoryScore
+      };
+    });
+    return question;
+  } catch (err: any) {
+    return CustomError.internalServer(err.message);
+  }
+}
+
+
+export interface IScoreByCategoryType {
+  id: number;
+  category: string;
+  questions: {
+    id: number;
+    question: string;
+    type: string;
+    multiple: string;
+    currentAnswer: ICurrentAnswer[];
+    answerOptions: {
+      id: number;
+      answerOption: string;
+    }[];
+  }[];
+  score: number;
+}[];
+
+export async function findUserInfo(userId: number, profileId: number): Promise<ResponseEntity> {
   try {
     const info = await userRepository.findUserInfo(userId);
-    if(info instanceof CustomError) {
+    if (info instanceof CustomError) {
       return BuildResponse.buildErrorResponse(info.statusCode, { message: info.message });
     }
-    const scoreInfo = {equipo: 1, oportunidad: 1, mercado: 1, resultadosFinancieros: 1, gobiernoCorporativo: 1, impactoSocial: 1, valores: 1, tecnologia: 1} ;
+    //const scoreInfo = { equipo: 1, oportunidad: 1, mercado: 1, resultadosFinancieros: 1, gobiernoCorporativo: 1, impactoSocial: 1, valores: 1, tecnologia: 1 };
+    const scoreByCategory = await findScoreByCategory(userId, profileId);
+    if (scoreByCategory instanceof CustomError) {
+      return BuildResponse.buildErrorResponse(scoreByCategory.statusCode, { message: scoreByCategory.message });
+    }
+
     const globalScore = await computeScore(userId);
-    return BuildResponse.buildSuccessResponse(StatusCode.Ok, {info, globaScore: globalScore.data, scoreInfo});
+    return BuildResponse.buildSuccessResponse(StatusCode.Ok, { info, globaScore: globalScore.data, scoreByCategory });
   } catch (err: any) {
     return BuildResponse.buildErrorResponse(StatusCode.InternalErrorServer, err);
   }
@@ -204,7 +263,7 @@ export async function findUserInfo(userId: number): Promise<ResponseEntity> {
 export async function updateUser(user: IUserUpdate, filePath: string): Promise<ResponseEntity> {
   try {
     const uploadResponse = await uploadFile(user.userId, filePath);
-    if(uploadResponse instanceof CustomError) {
+    if (uploadResponse instanceof CustomError) {
       return BuildResponse.buildErrorResponse(StatusCode.BadRequest, { message: uploadResponse.message });
     }
     const userDb = await userRepository.updateUser(user);
@@ -237,6 +296,7 @@ interface ICategory {
   id: number;
   CategoryTranslation: ICategoryTranslation;
   Questions: IQuestion[];
+  score?: number;
 }
 
 interface ICategoryTranslation {

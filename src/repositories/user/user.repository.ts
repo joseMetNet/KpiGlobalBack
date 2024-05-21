@@ -38,7 +38,7 @@ export async function findSurveyByProfile(profileId: number, language: string) {
           {
             model: QuestionType,
             attributes: ['type', 'multiple'],
-            required: true
+            required: false
           },
           {
             model: QuestionTranslation,
@@ -96,10 +96,10 @@ export async function updateUserProfile(userId: number, profileId: number): Prom
   try {
     await User.update(
       { profileId }, {
-        where: {
-          id: userId
-        }
+      where: {
+        id: userId
       }
+    }
     );
   } catch (err: any) {
     return CustomError.badRequest(err.message);
@@ -115,10 +115,10 @@ export async function updateUser(user: IUserUpdate): Promise<CustomError | strin
         lastName: user.lastName,
         photoUrl: `https://kpiglobal.blob.core.windows.net/profile-images/${user.userId}.png`
       }, {
-        where: {
-          id: user.userId
-        }
+      where: {
+        id: user.userId
       }
+    }
     );
     return 'Sucessfully update';
   } catch (err: any) {
@@ -203,6 +203,7 @@ export async function deleteUserAnswer(answer: IUserAnswer): Promise<void> {
   await UserAnswer.destroy({
     where: {
       userId: answer.userId,
+      questionId: answer.questionId,
     }
   });
 }
@@ -217,7 +218,7 @@ export async function findUserInfo(userId: number): Promise<IUserInfo | CustomEr
 
     return { firstName: user!.firstName, lastName: user!.lastName, email: user!.email, photoUrl: 'url' };
 
-  }catch(err: any) {
+  } catch (err: any) {
     return CustomError.internalServer(err);
   }
 }
