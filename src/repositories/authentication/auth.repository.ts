@@ -1,5 +1,5 @@
 import { CustomError, config } from '../../config';
-import { BcryptAdapter } from './BcryptAdapter';
+import { BcryptAdapter } from './bcrypt-adapter';
 import { ChangePasswordRequest, AuthRequest, RegisterRequest } from '../../interface';
 
 export async function findUserIdByEmail(email: string): Promise<CustomError | number> {

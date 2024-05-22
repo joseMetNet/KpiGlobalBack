@@ -1,11 +1,8 @@
-import { CustomError } from '../config';
-import * as jwt from 'jsonwebtoken';
-import { config } from '../config';
-import { AuthTokenPayload, StatusCode } from '../interface';
 import { DefaultAzureCredential } from '@azure/identity';
 import { BlobServiceClient, BlobUploadCommonResponse } from '@azure/storage-blob';
-import { FileArray } from 'express-fileupload';
-import { BuildResponse } from './BuildResponse';
+import * as jwt from 'jsonwebtoken';
+import { CustomError, config } from '../config';
+import { AuthTokenPayload } from '../interface';
 
 export function createAuthToken(payload: AuthTokenPayload): string {
   return jwt.sign(payload, config.AUTH_TOKEN_SECRET, {
@@ -59,15 +56,15 @@ export async function uploadFile(userId: number, filePath: string): Promise<Cust
     const blockBlobClient = containerClient.getBlockBlobClient(blobName);
     const uploadBlobResponse = await blockBlobClient.uploadFile(filePath);
     return uploadBlobResponse;
-  }catch(err: any){
+  } catch (err: any) {
     console.log(err);
-    return CustomError.internalServer(err);   
+    return CustomError.internalServer(err);
   }
 }
 
 function buildEmailBody(code: string) {
   const body: string =
-		`
+    `
     <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>
 <html xmlns='http://www.w3.org/1999/xhtml'>
   <head>

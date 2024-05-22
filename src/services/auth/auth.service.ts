@@ -1,8 +1,7 @@
 import { CustomError } from '../../config';
-import { UserDto } from '../../interface';
-import { RegisterRequest, ResponseEntity, AuthTokenPayload, AuthRequest, VerifyUserRequest, StatusCode, ChangePasswordRequest } from '../../interface';
+import { AuthRequest, AuthTokenPayload, ChangePasswordRequest, RegisterRequest, ResponseEntity, StatusCode, UserDto, VerifyUserRequest } from '../../interface';
 import { User, VerificationStatus, authRepository, categoryRepository, userRepository, verificationRepository } from '../../repositories';
-import { BuildResponse } from '../BuildResponse';
+import { BuildResponse } from '../build-response';
 import * as helper from '../helper';
 
 export async function register(request: RegisterRequest): Promise<ResponseEntity> {
@@ -70,7 +69,7 @@ export async function sendVerificationEmail(email: string): Promise<ResponseEnti
   let verificationCode: string;
   const codeExist: string | CustomError = await verificationRepository.findVerificationCodeWithEmail(email);
   if (codeExist instanceof CustomError) {
-    if(codeExist.statusCode === StatusCode.InternalErrorServer) {
+    if (codeExist.statusCode === StatusCode.InternalErrorServer) {
       return BuildResponse.buildErrorResponse(codeExist.statusCode, { error: codeExist.message });
     }
     const newCode = await verificationRepository.createCode(email);
@@ -104,10 +103,10 @@ export async function verifyUser(request: VerifyUserRequest): Promise<ResponseEn
   }
 
   const userId = await authRepository.findUserIdByEmail(request.email);
-  if(userId instanceof CustomError) {
-    return BuildResponse.buildErrorResponse(userId.statusCode, {error: userId.message});
+  if (userId instanceof CustomError) {
+    return BuildResponse.buildErrorResponse(userId.statusCode, { error: userId.message });
   }
-  
+
   const user = await userRepository.findUserById(userId) as UserDto;
   const payload: AuthTokenPayload = { id: userId, profileId: user.profileId };
   const token = helper.createAuthToken(payload);
@@ -116,6 +115,7 @@ export async function verifyUser(request: VerifyUserRequest): Promise<ResponseEn
 
 export async function resetPassword(request: ChangePasswordRequest): Promise<ResponseEntity> {
   const changePasswordStatus = await authRepository.changePasswordRequest(request);
+  console.log(changePasswordStatus);
   if (changePasswordStatus instanceof CustomError) {
     return BuildResponse.buildErrorResponse(changePasswordStatus.statusCode, { error: changePasswordStatus.message });
   }

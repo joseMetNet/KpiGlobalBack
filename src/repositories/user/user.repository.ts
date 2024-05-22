@@ -216,7 +216,7 @@ export async function findUserInfo(userId: number): Promise<IUserInfo | CustomEr
       }
     });
 
-    return { firstName: user!.firstName, lastName: user!.lastName, email: user!.email, photoUrl: 'url' };
+    return { firstName: user!.firstName, lastName: user!.lastName, email: user!.email, photoUrl: user!.photoUrl ? user!.photoUrl : '' };
 
   } catch (err: any) {
     return CustomError.internalServer(err);
