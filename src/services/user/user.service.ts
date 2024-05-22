@@ -47,54 +47,45 @@ export async function findSurveyByProfile(profileId: number, language: string): 
 export async function findAnsweredQuestions(profileId: number, language: string, userId?: number): Promise<ResponseEntity> {
   try {
     const survey = await userRepository.findSurveyByProfile(profileId, language);
-    const categories: ICategory[] = [];
-    for (const question of survey) {
-      const category: ICategory = {
-        id: question.get('id'),
-        CategoryTranslation: question.get('CategoryTranslation') as ICategoryTranslation,
-        Questions: question.get('Questions') as IQuestion[]
-      };
-      categories.push(category);
-    }
-    const questions = categories.map((category: ICategory) => {
-      return {
-        id: category.id,
-        category: category.CategoryTranslation.category,
-        questions: category.Questions.map((question: IQuestion) => {
-          return {
-            id: question.id,
-            question: question.QuestionTranslation.question,
-            type: question.QuestionType.type,
-            multiple: question.QuestionType.multiple,
-            currentAnswer: <ICurrentAnswer[]>[],
-            answerOptions: question.AnswerOptions.map((answer: IAnswerOption) => {
-              return {
-                id: answer.id,
-                answerOption: answer.AnswerOptionTranslation.answerOption,
-              };
-            }),
-          };
-        })
-      };
-    });
+    const categories: ICategory[] = survey.map(question => ({
+      id: question.get('id'),
+      CategoryTranslation: question.get('CategoryTranslation') as ICategoryTranslation,
+      Questions: question.get('Questions') as IQuestion[]
+    }));
+
+    const questions = categories.map((category: ICategory) => ({
+      id: category.id,
+      category: category.CategoryTranslation.category,
+      questions: category.Questions.map((question: IQuestion) => ({
+        id: question.id,
+        question: question.QuestionTranslation.question,
+        type: question.QuestionType.type,
+        multiple: question.QuestionType.multiple,
+        currentAnswer: [] as ICurrentAnswer[],
+        answerOptions: question.AnswerOptions.map((answer: IAnswerOption) => ({
+          id: answer.id,
+          answerOption: answer.AnswerOptionTranslation.answerOption,
+        })),
+      }))
+    }));
+
     if (userId) {
       const userAnswers = await userRepository.findUserAnswers(userId);
-      if (userAnswers.length !== 0) {
-        for (const category of questions) {
-          for (const question of category.questions) {
-            for (const answer of userAnswers) {
-              if (answer.questionId === question.id) {
-                const response = {
-                  userAnswerId: answer.answerOptionId,
-                  userAnswerText: answer.openAnswerText
-                };
-                question.currentAnswer.push(response);
-              }
-            }
+      const userAnswersMap = new Map(userAnswers.map(answer => [answer.questionId, answer]));
+
+      questions.forEach(category => {
+        category.questions.forEach(question => {
+          const answer = userAnswersMap.get(question.id);
+          if (answer) {
+            question.currentAnswer.push({
+              userAnswerId: answer.answerOptionId,
+              userAnswerText: answer.openAnswerText
+            });
           }
-        }
-      }
+        });
+      });
     }
+
     return BuildResponse.buildSuccessResponse(StatusCode.Ok, questions);
   } catch (err: any) {
     console.log(err);
