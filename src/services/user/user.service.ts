@@ -2,7 +2,7 @@ import { CustomError } from '../../config';
 import { IUserAnswer, IUserUpdate, ResponseEntity, StatusCode } from '../../interface';
 import { AnswerWeight, ProfileTranslation } from '../../models';
 import { userRepository } from '../../repositories';
-import { BuildResponse } from '../BuildResponse';
+import { BuildResponse } from '../build-response';
 import { uploadFile } from '../helper';
 
 export async function findSurveyByProfile(profileId: number, language: string): Promise<ResponseEntity> {

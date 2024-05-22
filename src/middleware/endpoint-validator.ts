@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { validationResult } from 'express-validator';
 import { StatusValue, StatusCode } from '../interface';
+import { ZodError } from 'zod';
 
 export const validateEndpoint = (req: Request, res: Response, next: NextFunction) => {
   const error = validationResult(req);
@@ -12,3 +13,7 @@ export const validateEndpoint = (req: Request, res: Response, next: NextFunction
   }
   next();
 };
+
+export function formatZodError(error: ZodError): string[] {
+  return error.errors.map(e => `${e.path.join('.')} - ${e.message}`);
+}
