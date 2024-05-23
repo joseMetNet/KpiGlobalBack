@@ -25,8 +25,8 @@ export const userIdSchema = z.object({
 
 export const updateUserSchema = z.object({
   userId: z.coerce.number(),
-  firstName: z.string(),
-  lastName: z.string()
+  firstName: z.string().optional(),
+  lastName: z.string().optional()
 });
 
 const userAnswerSchema = z.object({

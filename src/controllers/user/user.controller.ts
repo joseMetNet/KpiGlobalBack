@@ -101,11 +101,7 @@ class UserController {
       this.handleError(res, request.error);
       return;
     }
-    if (!req.files || !req.files.fileName) {
-      res.status(StatusCode.BadRequest).json({ status: StatusValue.Failed, data: { error: 'file is required' } });
-      return;
-    }
-    const filePath = (req.files.fileName as UploadedFile).tempFilePath;
+    const filePath = req.files? (req.files.fileName as UploadedFile).tempFilePath: undefined;
     const response = await userService.updateUser(request.data, filePath);
     res.status(response.code).json({ status: response.status, data: response.data });
   }
