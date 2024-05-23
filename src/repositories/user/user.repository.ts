@@ -1,6 +1,6 @@
 import { Sequelize } from 'sequelize';
 import { CustomError } from '../../config';
-import { IUserAnswer, IUserInfo, IUserUpdate, UserDto } from '../../interface';
+import { IUserAnswer, IUserInfo } from '../../interface';
 import {
   AnswerOption,
   AnswerOptionTranslation,
@@ -95,52 +95,29 @@ export async function findSurveyByProfile(profileId: number, language: string) {
 export async function updateUserProfile(userId: number, profileId: number): Promise<CustomError | void> {
   try {
     await User.update(
-      { profileId }, {
-      where: {
-        id: userId
-      }
-    }
-    );
-  } catch (err: any) {
-    return CustomError.badRequest(err.message);
-  }
-}
-
-export async function updateUser(user: IUserUpdate): Promise<CustomError | string> {
-  try {
-    console.log(user);
-    await User.update(
+      { profileId },
       {
-        firstName: user.firstName,
-        lastName: user.lastName,
-        photoUrl: `https://kpiglobal.blob.core.windows.net/profile-images/${user.userId}.png`
-      }, {
-      where: {
-        id: user.userId
+        where: {
+          id: userId
+        }
       }
-    }
     );
-    return 'Sucessfully update';
   } catch (err: any) {
     return CustomError.badRequest(err.message);
   }
 }
 
-export async function findUserById(userId: number): Promise<CustomError | UserDto> {
+
+export async function findUserById(userId: number): Promise<CustomError | User> {
   try {
     const user = await User.findByPk(userId);
-    return userToUserDto(user!);
+    if (!user) {
+      return CustomError.notFound('User not found');
+    }
+    return user;
   } catch (err: any) {
     return CustomError.badRequest(err.message);
   }
-}
-
-export function userToUserDto(user: User): UserDto {
-  return {
-    id: user.id,
-    profileId: user.profileId,
-    isRegistrationCompleted: user.isRegistrationCompleted
-  };
 }
 
 

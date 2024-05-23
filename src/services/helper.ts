@@ -44,7 +44,7 @@ export async function sendVerificationEmail(code: string, email: string): Promis
   }
 }
 
-export async function uploadFile(userId: number, filePath: string): Promise<CustomError | BlobUploadCommonResponse> {
+export async function uploadImageProfile(userId: number, filePath: string): Promise<CustomError | BlobUploadCommonResponse> {
   try {
     const defaultAzureCredential = new DefaultAzureCredential();
     const blobServiceClient = new BlobServiceClient(

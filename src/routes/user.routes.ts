@@ -425,9 +425,9 @@ export function userRoutes(app: Application): void {
    *                userId:
    *                  type: number
    *                firstName:
-   *                  type: number
+   *                  type: string
    *                lastName:
-   *                  type: number
+   *                  type: string
    *                fileName:
    *                  type: string
    *                  format: binary
@@ -443,7 +443,7 @@ export function userRoutes(app: Application): void {
     '/',
     [check('userId', 'userId is required').notEmpty(), validateEndpoint],
     validateEndpoint,
-    //authentication,
+    authentication,
     userController.updateUser
   );
   app.use('/api/v1/user/', routes);

@@ -3,7 +3,8 @@ import { IUserAnswer, IUserUpdate, ResponseEntity, StatusCode } from '../../inte
 import { AnswerWeight, ProfileTranslation } from '../../models';
 import { userRepository } from '../../repositories';
 import { BuildResponse } from '../build-response';
-import { uploadFile } from '../helper';
+import { uploadImageProfile } from '../helper';
+import { userToUserDto } from './utils';
 
 export async function findSurveyByProfile(profileId: number, language: string): Promise<ResponseEntity> {
   try {
@@ -113,6 +114,25 @@ export async function insertUserResponse(userResponse: IUserAnswer[]): Promise<R
     await Promise.all(userDeletePromises);
     const userInsertPromises = userResponse.map(item => userRepository.insertUserAnswer(item));
     await Promise.all(userInsertPromises);
+
+    const user = await userRepository.findUserById(userResponse[0].userId);
+    if (user instanceof CustomError) {
+      return BuildResponse.buildErrorResponse(user.statusCode, { message: user.message });
+    }
+
+    // check if all responses were saved, for the entrepreneur profile we know that if the last inserted questionId is 53
+    const lastQuestionId = userResponse[userResponse.length - 1].questionId;
+    if (lastQuestionId === 53 && user.profileId === 2) {
+      // update the isRegistrationCompleted property on the user table
+      user.isRegistrationCompleted = 1;
+      await user.save();
+    }
+    // check if all responses were saved, for the investor profile we know that if the last inserted questionId is 13
+    if (lastQuestionId === 13 && user.profileId === 1) {
+      // update the isRegistrationCompleted property on the user table
+      user.isRegistrationCompleted = 1;
+      await user.save();
+    }
     return BuildResponse.buildSuccessResponse(StatusCode.ResourceCreated, { message: 'Answer correctly saved.' });
   } catch (err: any) {
     return BuildResponse.buildErrorResponse(StatusCode.InternalErrorServer, err.message);
@@ -238,7 +258,6 @@ export async function findUserInfo(userId: number, profileId: number): Promise<R
     if (info instanceof CustomError) {
       return BuildResponse.buildErrorResponse(info.statusCode, { message: info.message });
     }
-    //const scoreInfo = { equipo: 1, oportunidad: 1, mercado: 1, resultadosFinancieros: 1, gobiernoCorporativo: 1, impactoSocial: 1, valores: 1, tecnologia: 1 };
     const scoreByCategory = await findScoreByCategory(userId, profileId);
     if (scoreByCategory instanceof CustomError) {
       return BuildResponse.buildErrorResponse(scoreByCategory.statusCode, { message: scoreByCategory.message });
@@ -251,18 +270,23 @@ export async function findUserInfo(userId: number, profileId: number): Promise<R
   }
 }
 
-export async function updateUser(user: IUserUpdate, filePath: string): Promise<ResponseEntity> {
+export async function updateUser(user: IUserUpdate, filePath?: string): Promise<ResponseEntity> {
   try {
-    const uploadResponse = await uploadFile(user.userId, filePath);
-    if (uploadResponse instanceof CustomError) {
-      return BuildResponse.buildErrorResponse(StatusCode.BadRequest, { message: uploadResponse.message });
+    if (filePath) {
+      const uploadImageResponse = await uploadImageProfile(user.userId, filePath);
+      if (uploadImageResponse instanceof CustomError) {
+        return BuildResponse.buildErrorResponse(StatusCode.BadRequest, { message: uploadImageResponse.message });
+      }
     }
-    const userDb = await userRepository.updateUser(user);
+    const userDb = await userRepository.findUserById(user.userId);
     if (userDb instanceof CustomError) {
       return BuildResponse.buildErrorResponse(userDb.statusCode, { message: userDb.message });
     }
-
-    return BuildResponse.buildSuccessResponse(StatusCode.Ok, { message: userDb });
+    user.firstName ? userDb.firstName = user.firstName : userDb.firstName;
+    user.lastName ? userDb.lastName = user.lastName : userDb.lastName;
+    filePath ? userDb.photoUrl = `https://kpiglobal.blob.core.windows.net/profile-images/${user.userId}.png` : userDb.photoUrl;
+    await userDb.save();
+    return BuildResponse.buildSuccessResponse(StatusCode.Ok, { data: userToUserDto(userDb) });
   } catch (err: any) {
     return BuildResponse.buildErrorResponse(StatusCode.InternalErrorServer, err);
   }

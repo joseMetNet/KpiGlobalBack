@@ -137,3 +137,6 @@ dist
 .env
 
 config-builds
+
+#temporary files
+tmp

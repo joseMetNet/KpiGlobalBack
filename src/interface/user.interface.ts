@@ -20,6 +20,6 @@ export interface IUserInfo {
 
 export interface IUserUpdate {
   userId: number;
-  firstName: string;
-  lastName: string;
+  firstName?: string;
+  lastName?: string;
 }

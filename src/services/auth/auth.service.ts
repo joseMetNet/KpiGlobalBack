@@ -1,17 +1,17 @@
 import { CustomError } from '../../config';
-import { AuthRequest, AuthTokenPayload, ChangePasswordRequest, RegisterRequest, ResponseEntity, StatusCode, UserDto, VerifyUserRequest } from '../../interface';
-import { User, VerificationStatus, authRepository, categoryRepository, userRepository, verificationRepository } from '../../repositories';
+import { AuthRequest, AuthTokenPayload, ChangePasswordRequest, RegisterRequest, ResponseEntity, StatusCode, VerifyUserRequest } from '../../interface';
+import { User, authRepository, categoryRepository, userRepository, verificationRepository } from '../../repositories';
 import { BuildResponse } from '../build-response';
 import * as helper from '../helper';
 
 export async function register(request: RegisterRequest): Promise<ResponseEntity> {
   try {
-    const userExist: number | CustomError = await authRepository.findUserIdByEmail(request.email);
+    const userExist = await authRepository.findUserIdByEmail(request.email);
     if (typeof userExist === 'number') {
       return BuildResponse.buildErrorResponse(StatusCode.Conflict, { error: 'User already exist' });
     }
 
-    const partialUser: number | CustomError = await authRepository.registerRequest(request);
+    const partialUser = await authRepository.registerRequest(request);
     if (partialUser instanceof CustomError) {
       return BuildResponse.buildErrorResponse(partialUser.statusCode, { error: partialUser.message });
     }
@@ -35,21 +35,22 @@ export async function register(request: RegisterRequest): Promise<ResponseEntity
 }
 
 export async function login(request: AuthRequest): Promise<ResponseEntity> {
-  const userExist: number | CustomError = await authRepository.findUserIdByEmail(request.email);
+  const userExist = await authRepository.findUserIdByEmail(request.email);
   if (userExist instanceof CustomError) {
     console.log(`User exist => ${userExist}`);
     BuildResponse.buildErrorResponse(userExist.statusCode, { error: userExist.message });
   }
-  const authStatus: number | CustomError = await authRepository.authRequest(request);
+  const authStatus = await authRepository.authRequest(request);
   if (authStatus instanceof CustomError) {
     return BuildResponse.buildErrorResponse(authStatus.statusCode, { error: authStatus.message });
   }
 
-  const user: CustomError | UserDto = await userRepository.findUserById(authStatus);
+  const user = await userRepository.findUserById(authStatus);
 
   if (user instanceof CustomError) {
     return BuildResponse.buildErrorResponse(user.statusCode, { error: user.message });
   }
+
   const lastCategoryId = await categoryRepository.findLastInsertedCategory(user.id);
   if (lastCategoryId instanceof CustomError) {
     return BuildResponse.buildErrorResponse(lastCategoryId.statusCode, { error: lastCategoryId.message });
@@ -61,13 +62,13 @@ export async function login(request: AuthRequest): Promise<ResponseEntity> {
 
 
 export async function sendVerificationEmail(email: string): Promise<ResponseEntity> {
-  const userExist: number | CustomError = await authRepository.findUserIdByEmail(email);
+  const userExist = await authRepository.findUserIdByEmail(email);
   if (userExist instanceof CustomError) {
     return BuildResponse.buildErrorResponse(userExist.statusCode, { error: userExist.message });
   }
 
   let verificationCode: string;
-  const codeExist: string | CustomError = await verificationRepository.findVerificationCodeWithEmail(email);
+  const codeExist = await verificationRepository.findVerificationCodeWithEmail(email);
   if (codeExist instanceof CustomError) {
     if (codeExist.statusCode === StatusCode.InternalErrorServer) {
       return BuildResponse.buildErrorResponse(codeExist.statusCode, { error: codeExist.message });
@@ -88,7 +89,7 @@ export async function sendVerificationEmail(email: string): Promise<ResponseEnti
   }
 
 
-  const verificationEmail: string | CustomError = await helper.sendVerificationEmail(verificationCode, email);
+  const verificationEmail = await helper.sendVerificationEmail(verificationCode, email);
   if (verificationEmail instanceof CustomError) {
     return BuildResponse.buildErrorResponse(verificationEmail.statusCode, { error: verificationEmail.message });
   }
@@ -97,7 +98,7 @@ export async function sendVerificationEmail(email: string): Promise<ResponseEnti
 }
 
 export async function verifyUser(request: VerifyUserRequest): Promise<ResponseEntity> {
-  const isValid: CustomError | VerificationStatus = await verificationRepository.findCode(request);
+  const isValid = await verificationRepository.findCode(request);
   if (isValid instanceof CustomError) {
     return BuildResponse.buildErrorResponse(isValid.statusCode, { error: isValid.message });
   }
@@ -107,7 +108,10 @@ export async function verifyUser(request: VerifyUserRequest): Promise<ResponseEn
     return BuildResponse.buildErrorResponse(userId.statusCode, { error: userId.message });
   }
 
-  const user = await userRepository.findUserById(userId) as UserDto;
+  const user = await userRepository.findUserById(userId);
+  if (user instanceof CustomError) {
+    return BuildResponse.buildErrorResponse(user.statusCode, { error: user.message });
+  }
   const payload: AuthTokenPayload = { id: userId, profileId: user.profileId };
   const token = helper.createAuthToken(payload);
   return BuildResponse.buildSuccessResponse(StatusCode.Ok, { token: token });
@@ -115,7 +119,6 @@ export async function verifyUser(request: VerifyUserRequest): Promise<ResponseEn
 
 export async function resetPassword(request: ChangePasswordRequest): Promise<ResponseEntity> {
   const changePasswordStatus = await authRepository.changePasswordRequest(request);
-  console.log(changePasswordStatus);
   if (changePasswordStatus instanceof CustomError) {
     return BuildResponse.buildErrorResponse(changePasswordStatus.statusCode, { error: changePasswordStatus.message });
   }
