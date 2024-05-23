@@ -72,19 +72,17 @@ export async function findAnsweredQuestions(profileId: number, language: string,
 
     if (userId) {
       const userAnswers = await userRepository.findUserAnswers(userId);
-      const userAnswersMap = new Map(userAnswers.map(answer => [answer.questionId, answer]));
-
-      questions.forEach(category => {
-        category.questions.forEach(question => {
-          const answer = userAnswersMap.get(question.id);
+      for (const category of questions) {
+        for (const question of category.questions) {
+          const answer = userAnswers.filter(answer => answer.questionId === question.id);
           if (answer) {
-            question.currentAnswer.push({
-              userAnswerId: answer.answerOptionId,
-              userAnswerText: answer.openAnswerText
-            });
+            question.currentAnswer = answer.map(item => ({
+              userAnswerId: item.answerOptionId,
+              userAnswerText: item.openAnswerText
+            }));
           }
-        });
-      });
+        }
+      }
     }
 
     return BuildResponse.buildSuccessResponse(StatusCode.Ok, questions);
