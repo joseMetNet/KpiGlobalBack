@@ -114,6 +114,25 @@ export async function insertUserResponse(userResponse: IUserAnswer[]): Promise<R
     await Promise.all(userDeletePromises);
     const userInsertPromises = userResponse.map(item => userRepository.insertUserAnswer(item));
     await Promise.all(userInsertPromises);
+
+    const user = await userRepository.findUserById(userResponse[0].userId);
+    if (user instanceof CustomError) {
+      return BuildResponse.buildErrorResponse(user.statusCode, { message: user.message });
+    }
+
+    // check if all responses were saved, for the entrepreneur profile we know that if the last inserted questionId is 53
+    const lastQuestionId = userResponse[userResponse.length - 1].questionId;
+    if (lastQuestionId === 53 && user.profileId === 2) {
+      // update the isRegistrationCompleted property on the user table
+      user.isRegistrationCompleted = 1;
+      await user.save();
+    }
+    // check if all responses were saved, for the investor profile we know that if the last inserted questionId is 13
+    if (lastQuestionId === 13 && user.profileId === 1) {
+      // update the isRegistrationCompleted property on the user table
+      user.isRegistrationCompleted = 1;
+      await user.save();
+    }
     return BuildResponse.buildSuccessResponse(StatusCode.ResourceCreated, { message: 'Answer correctly saved.' });
   } catch (err: any) {
     return BuildResponse.buildErrorResponse(StatusCode.InternalErrorServer, err.message);
