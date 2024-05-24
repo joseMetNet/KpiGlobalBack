@@ -271,6 +271,19 @@ export async function findUserInfo(userId: number, profileId: number): Promise<R
   }
 }
 
+// service to soft delete a user
+export async function deleteUser(userId: number): Promise<ResponseEntity> {
+  try {
+    const deleteResponse = await userRepository.deleteUser(userId);
+    if (deleteResponse instanceof CustomError) {
+      return BuildResponse.buildErrorResponse(deleteResponse.statusCode, { message: deleteResponse.message });
+    }
+    return BuildResponse.buildSuccessResponse(StatusCode.Ok, { message: 'User deleted' });
+  } catch (err: any) {
+    return BuildResponse.buildErrorResponse(StatusCode.InternalErrorServer, err);
+  }
+}
+
 export async function updateUser(user: IUserUpdate, filePath?: string): Promise<ResponseEntity> {
   try {
     const userDb = await userRepository.findUserById(user.userId);

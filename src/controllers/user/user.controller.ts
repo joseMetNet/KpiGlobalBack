@@ -105,6 +105,16 @@ class UserController {
     const response = await userService.updateUser(request.data, filePath);
     res.status(response.code).json({ status: response.status, data: response.data });
   }
+
+  async deleteUser(req: Request, res: Response): Promise<void> {
+    const request = userIdSchema.safeParse(req.query);
+    if (!request.success) {
+      this.handleError(res, request.error);
+      return;
+    }
+    const response = await userService.deleteUser(request.data.userId);
+    res.status(response.code).json({ status: response.status, data: response.data });
+  }
 }
 
 export const userController = new UserController();

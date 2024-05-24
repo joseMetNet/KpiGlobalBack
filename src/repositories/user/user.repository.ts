@@ -125,10 +125,32 @@ export async function findLastUserAnswer(userId: number): Promise<UserAnswer | C
   }
 }
 
+// function to soft delete a user
+export async function deleteUser(userId: number): Promise<CustomError | void> {
+  try {
+    await User.update(
+      { deletedAt: new Date() },
+      {
+        where: {
+          id: userId
+        }
+      }
+    );
+  } catch (err: any) {
+    console.log(err);
+    return CustomError.badRequest(err.message);
+  }
+}
+
 
 export async function findUserById(userId: number): Promise<CustomError | User> {
   try {
-    const user = await User.findByPk(userId);
+    const user = await User.findOne({
+      where: {
+        id: userId,
+        deletedAt: null
+      }
+    });
     if (!user) {
       return CustomError.notFound('User not found');
     }
