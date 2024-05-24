@@ -3,7 +3,7 @@ import { IUserAnswer, IUserUpdate, ResponseEntity, StatusCode } from '../../inte
 import { AnswerWeight, ProfileTranslation } from '../../models';
 import { userRepository } from '../../repositories';
 import { BuildResponse } from '../build-response';
-import { uploadImageProfile } from '../helper';
+import { deleteImageProfile, uploadImageProfile } from '../helper';
 import { userToUserDto } from './utils';
 
 export async function findSurveyByProfile(profileId: number, language: string): Promise<ResponseEntity> {
@@ -119,14 +119,17 @@ export async function insertUserResponse(userResponse: IUserAnswer[]): Promise<R
     }
 
     // check if all responses were saved, for the entrepreneur profile we know that if the last inserted questionId is 53
-    const lastQuestionId = userResponse[userResponse.length - 1].questionId;
-    if (lastQuestionId === 53 && user.profileId === 2) {
+    const lastQuestionId = await userRepository.findLastUserAnswer(userResponse[0].userId);
+    if (lastQuestionId instanceof CustomError) {
+      return BuildResponse.buildErrorResponse(lastQuestionId.statusCode, { message: lastQuestionId.message });
+    }
+    if (lastQuestionId.questionId === 53 && user.profileId === 2) {
       // update the isRegistrationCompleted property on the user table
       user.isRegistrationCompleted = 1;
       await user.save();
     }
     // check if all responses were saved, for the investor profile we know that if the last inserted questionId is 13
-    if (lastQuestionId === 13 && user.profileId === 1) {
+    if (lastQuestionId.questionId === 13 && user.profileId === 1) {
       // update the isRegistrationCompleted property on the user table
       user.isRegistrationCompleted = 1;
       await user.save();
@@ -270,19 +273,29 @@ export async function findUserInfo(userId: number, profileId: number): Promise<R
 
 export async function updateUser(user: IUserUpdate, filePath?: string): Promise<ResponseEntity> {
   try {
-    if (filePath) {
-      const uploadImageResponse = await uploadImageProfile(user.userId, filePath);
-      if (uploadImageResponse instanceof CustomError) {
-        return BuildResponse.buildErrorResponse(StatusCode.BadRequest, { message: uploadImageResponse.message });
-      }
-    }
     const userDb = await userRepository.findUserById(user.userId);
     if (userDb instanceof CustomError) {
       return BuildResponse.buildErrorResponse(userDb.statusCode, { message: userDb.message });
     }
+
+    const identifier = crypto.randomUUID();
+
+    if (filePath) {
+      if (userDb.photoUrl) {
+        const deleteBlobResponse = await deleteImageProfile(userDb.photoUrl.split('/').pop() as string);
+        if (deleteBlobResponse instanceof CustomError) {
+          return BuildResponse.buildErrorResponse(StatusCode.BadRequest, { message: deleteBlobResponse.message });
+        }
+      }
+      const uploadImageResponse = await uploadImageProfile(filePath, identifier);
+      if (uploadImageResponse instanceof CustomError) {
+        return BuildResponse.buildErrorResponse(StatusCode.BadRequest, { message: uploadImageResponse.message });
+      }
+    }
+
     user.firstName ? userDb.firstName = user.firstName : userDb.firstName;
     user.lastName ? userDb.lastName = user.lastName : userDb.lastName;
-    filePath ? userDb.photoUrl = `https://kpiglobal.blob.core.windows.net/profile-images/${user.userId}.png` : userDb.photoUrl;
+    filePath ? userDb.photoUrl = `https://kpiglobal.blob.core.windows.net/profile-images/${identifier}.png` : userDb.photoUrl;
     await userDb.save();
     return BuildResponse.buildSuccessResponse(StatusCode.Ok, { data: userToUserDto(userDb) });
   } catch (err: any) {

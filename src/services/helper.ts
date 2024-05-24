@@ -44,7 +44,7 @@ export async function sendVerificationEmail(code: string, email: string): Promis
   }
 }
 
-export async function uploadImageProfile(userId: number, filePath: string): Promise<CustomError | BlobUploadCommonResponse> {
+export async function uploadImageProfile(filePath: string, identifier: string): Promise<CustomError | BlobUploadCommonResponse> {
   try {
     const defaultAzureCredential = new DefaultAzureCredential();
     const blobServiceClient = new BlobServiceClient(
@@ -52,9 +52,26 @@ export async function uploadImageProfile(userId: number, filePath: string): Prom
       defaultAzureCredential
     );
     const containerClient = blobServiceClient.getContainerClient(config.AZURE_STORAGE_CONTAINER_NAME);
-    const blobName = `${userId}.png`;
+    const blobName = `${identifier}.png`;
     const blockBlobClient = containerClient.getBlockBlobClient(blobName);
     const uploadBlobResponse = await blockBlobClient.uploadFile(filePath);
+    return uploadBlobResponse;
+  } catch (err: any) {
+    console.log(err);
+    return CustomError.internalServer(err);
+  }
+}
+
+export async function deleteImageProfile(blobName: string): Promise<CustomError | BlobUploadCommonResponse> {
+  try {
+    const defaultAzureCredential = new DefaultAzureCredential();
+    const blobServiceClient = new BlobServiceClient(
+      `https://${config.AZURE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net`,
+      defaultAzureCredential
+    );
+    const containerClient = blobServiceClient.getContainerClient(config.AZURE_STORAGE_CONTAINER_NAME);
+    const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+    const uploadBlobResponse = await blockBlobClient.delete();
     return uploadBlobResponse;
   } catch (err: any) {
     console.log(err);
