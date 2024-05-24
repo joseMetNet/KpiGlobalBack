@@ -107,6 +107,24 @@ export async function updateUserProfile(userId: number, profileId: number): Prom
   }
 }
 
+export async function findLastUserAnswer(userId: number): Promise<UserAnswer | CustomError> {
+  try {
+    const response = await UserAnswer.findOne({
+      where: {
+        userId
+      },
+      order: [['questionId', 'DESC']]
+    });
+
+    if (!response) {
+      return CustomError.notFound('User answer not found');
+    }
+    return response;
+  } catch (err: any) {
+    return CustomError.badRequest(err.message);
+  }
+}
+
 
 export async function findUserById(userId: number): Promise<CustomError | User> {
   try {

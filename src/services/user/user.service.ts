@@ -119,14 +119,17 @@ export async function insertUserResponse(userResponse: IUserAnswer[]): Promise<R
     }
 
     // check if all responses were saved, for the entrepreneur profile we know that if the last inserted questionId is 53
-    const lastQuestionId = userResponse[userResponse.length - 1].questionId;
-    if (lastQuestionId === 53 && user.profileId === 2) {
+    const lastQuestionId = await userRepository.findLastUserAnswer(userResponse[0].userId);
+    if (lastQuestionId instanceof CustomError) {
+      return BuildResponse.buildErrorResponse(lastQuestionId.statusCode, { message: lastQuestionId.message });
+    }
+    if (lastQuestionId.questionId === 53 && user.profileId === 2) {
       // update the isRegistrationCompleted property on the user table
       user.isRegistrationCompleted = 1;
       await user.save();
     }
     // check if all responses were saved, for the investor profile we know that if the last inserted questionId is 13
-    if (lastQuestionId === 13 && user.profileId === 1) {
+    if (lastQuestionId.questionId === 13 && user.profileId === 1) {
       // update the isRegistrationCompleted property on the user table
       user.isRegistrationCompleted = 1;
       await user.save();
