@@ -446,5 +446,30 @@ export function userRoutes(app: Application): void {
     authentication,
     userController.updateUser
   );
+
+  /**
+   * @openapi
+   *  /v1/user:
+   *    delete:
+   *      tags: [User Controller]
+   *      summary: Delete user
+   *      parameters:
+   *        - $ref: "#/components/parameters/userId"
+   *      responses:
+   *        '200':
+   *          description: Successful response
+   *          content:
+   *            application/json:
+   *              schema:
+   *                $ref: '#/components/responses/successResponse'
+   */
+  routes.delete(
+    '/',
+    [check('userId', 'userId is required').notEmpty(), validateEndpoint],
+    validateEndpoint,
+    authentication,
+    userController.deleteUser
+  );
+
   app.use('/api/v1/user/', routes);
 }

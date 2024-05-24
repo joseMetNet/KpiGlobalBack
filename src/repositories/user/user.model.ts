@@ -12,6 +12,7 @@ export class User extends Model {
   declare roleId: number;
   declare profileId: number;
   declare isRegistrationCompleted: number;
+  declare deletedAt: Date;
 }
 
 User.init({
@@ -53,6 +54,11 @@ User.init({
     type: DataTypes.NUMBER,
     allowNull: false,
     defaultValue: 0
+  },
+  deletedAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    defaultValue: null
   }
 }, {
   sequelize,
